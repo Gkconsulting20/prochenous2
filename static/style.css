@@ -1,17 +1,17 @@
 :root {
-    --primary-color: #1e40af;
-    --primary-dark: #1e3a8a;
-    --secondary-color: #3b82f6;
+    --primary-color: #dc2626;
+    --primary-dark: #991b1b;
+    --secondary-color: #ef4444;
     --text-dark: #1f2937;
     --text-light: #6b7280;
     --border-color: #e5e7eb;
-    --bg-light: #f0f9ff;
+    --bg-light: #fef2f2;
 }
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     color: var(--text-dark);
-    background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+    background: linear-gradient(135deg, #991b1b 0%, #dc2626 100%);
     min-height: 100vh;
 }
 
@@ -64,7 +64,7 @@ body {
 .btn-primary:hover {
     background: var(--primary-dark);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
 }
 
 .btn-success {
@@ -79,7 +79,7 @@ body {
 .btn-success:hover {
     background: var(--primary-color);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
 }
 
 .form-control {
@@ -91,7 +91,7 @@ body {
 
 .form-control:focus {
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
 }
 
 .list-group-item {
