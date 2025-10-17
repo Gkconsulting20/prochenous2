@@ -73,6 +73,18 @@ Flask web application with SQLite database
 
 ## Recent Changes (October 17, 2025)
 
+### Latest Updates - Security & Search Features
+- **Sécurité renforcée:**
+  - Implémentation du hashage des mots de passe avec bcrypt
+  - Les mots de passe ne sont plus stockés en clair
+  - Protection contre les fuites de données
+- **Système de recherche et filtrage:**
+  - Recherche par nom de professionnel
+  - Filtre par ville/localisation
+  - Filtre par note minimale (3+, 4+, 5/5)
+  - Bouton de réinitialisation des filtres
+  - Interface utilisateur intuitive avec formulaire moderne
+
 ### Initial Setup
 - Imported project from GitHub
 - Configured for Replit environment
@@ -125,7 +137,11 @@ Flask web application with SQLite database
 
 ## Notes
 - The application uses Flask's development server in debug mode
+- **Security:**
+  - ✅ Passwords are now securely hashed with bcrypt
+  - ✅ Registration and login fully secured
 - **Security Considerations for Production:**
-  - Session secret key is currently hardcoded (should use environment variables)
-  - Passwords are stored in plain text (should implement hashing with bcrypt or similar)
-  - Flask development server is not suitable for production (use Gunicorn/Waitress instead)
+  - ⚠️ Session secret key is currently hardcoded (should use environment variables)
+  - ⚠️ Flask development server is not suitable for production (use Gunicorn/Waitress instead)
+  - ⚠️ Consider adding CSRF protection for forms
+  - ⚠️ Add rate limiting for login attempts
