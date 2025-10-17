@@ -1,0 +1,12 @@
+{% extends "base.html" %}{% block title %}Réserver{% endblock %}{% block content %}
+<h3>Réserver avec {{ pro.name }}</h3>
+<form method="post">
+    <label>Choisir un créneau :</label>
+    <select class="form-control mb-2" name="slot_id" required>
+        {% for slot in slots %}
+        <option value="{{ slot.id }}">{{ slot.date }}</option>
+        {% endfor %}
+    </select>
+    <button class="btn btn-success" type="submit">Réserver</button>
+</form>
+{% endblock %}

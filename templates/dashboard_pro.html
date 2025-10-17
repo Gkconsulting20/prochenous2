@@ -1,0 +1,10 @@
+{% extends "base.html" %}{% block title %}Tableau de bord Pro{% endblock %}{% block content %}
+<h3>Bienvenue {{ user.name }}</h3>
+<a href="{{ url_for('add_slot') }}" class="btn btn-outline-primary mb-3">Ajouter un créneau</a>
+<h5>Vos rendez-vous :</h5>
+<ul class="list-group">
+    {% for rdv in rdvs %}
+    <li class="list-group-item">{{ rdv.date }} avec {{ rdv.client }}</li>
+    {% endfor %}
+</ul>
+{% endblock %}

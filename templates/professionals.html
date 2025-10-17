@@ -1,0 +1,11 @@
+{% extends "base.html" %}{% block title %}Professionnels{% endblock %}{% block content %}
+<h3>Liste des professionnels</h3>
+<ul class="list-group">
+{% for pro in professionals %}
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+        {{ pro.name }} - {{ pro.email }}
+        <a href="{{ url_for('book', pro_id=pro.id) }}" class="btn btn-sm btn-outline-success">Réserver</a>
+    </li>
+{% endfor %}
+</ul>
+{% endblock %}

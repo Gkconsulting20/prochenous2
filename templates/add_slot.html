@@ -1,0 +1,7 @@
+{% extends "base.html" %}{% block title %}Ajouter un créneau{% endblock %}{% block content %}
+<h3>Ajouter un créneau disponible</h3>
+<form method="post">
+    <input class="form-control mb-2" type="datetime-local" name="date" required>
+    <button class="btn btn-primary" type="submit">Ajouter</button>
+</form>
+{% endblock %}

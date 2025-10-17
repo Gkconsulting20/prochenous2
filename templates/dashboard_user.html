@@ -1,0 +1,4 @@
+{% extends "base.html" %}{% block title %}Tableau de bord Utilisateur{% endblock %}{% block content %}
+<h3>Bienvenue {{ user.name }}</h3>
+<a href="{{ url_for('view_professionals') }}" class="btn btn-info mb-3">Voir les professionnels</a>
+{% endblock %}
