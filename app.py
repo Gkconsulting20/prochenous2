@@ -17,8 +17,9 @@ def index():
 def register():
     if request.method == 'POST':
         conn = get_db()
-        conn.execute('INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)',
-                     (request.form['name'], request.form['email'], request.form['password'], request.form['role']))
+        localisation = request.form.get('localisation', '')
+        conn.execute('INSERT INTO users (name, email, password, role, localisation) VALUES (?, ?, ?, ?, ?)',
+                     (request.form['name'], request.form['email'], request.form['password'], request.form['role'], localisation))
         conn.commit()
         return redirect(url_for('login'))
     return render_template('register.html')
@@ -51,7 +52,16 @@ def dashboard():
 @app.route('/professionals')
 def view_professionals():
     conn = get_db()
-    pros = conn.execute("SELECT * FROM users WHERE role = 'pro'").fetchall()
+    pros = conn.execute('''
+        SELECT u.id, u.name, u.localisation,
+               COALESCE(AVG(a.note), 0) as note_moyenne,
+               COUNT(a.id) as nb_avis
+        FROM users u
+        LEFT JOIN avis a ON u.id = a.pro_id
+        WHERE u.role = 'pro'
+        GROUP BY u.id
+        ORDER BY note_moyenne DESC
+    ''').fetchall()
     return render_template('professionals.html', professionals=pros)
 
 @app.route('/book/<int:pro_id>', methods=['GET', 'POST'])
@@ -81,6 +91,22 @@ def add_slot():
         return redirect(url_for('dashboard'))
     return render_template('add_slot.html')
 
+@app.route('/rate/<int:pro_id>', methods=['GET', 'POST'])
+def rate(pro_id):
+    if 'user_id' not in session or session['role'] != 'user':
+        return redirect(url_for('login'))
+    conn = get_db()
+    if request.method == 'POST':
+        from datetime import datetime
+        note = request.form['note']
+        commentaire = request.form.get('commentaire', '')
+        conn.execute('INSERT INTO avis (pro_id, client_id, note, commentaire, date) VALUES (?, ?, ?, ?, ?)',
+                     (pro_id, session['user_id'], note, commentaire, datetime.now().strftime('%Y-%m-%d')))
+        conn.commit()
+        return redirect(url_for('view_professionals'))
+    pro = conn.execute('SELECT * FROM users WHERE id = ?', (pro_id,)).fetchone()
+    return render_template('rate.html', pro=pro)
+
 @app.route('/logout')
 def logout():
     session.clear()
@@ -91,7 +117,7 @@ def init_db():
     conn.executescript('''
     CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY,
-        name TEXT, email TEXT, password TEXT, role TEXT
+        name TEXT, email TEXT, password TEXT, role TEXT, localisation TEXT
     );
     CREATE TABLE IF NOT EXISTS slots (
         id INTEGER PRIMARY KEY,
@@ -101,8 +127,22 @@ def init_db():
         id INTEGER PRIMARY KEY,
         pro_id INTEGER, client_id INTEGER, date TEXT
     );
+    CREATE TABLE IF NOT EXISTS avis (
+        id INTEGER PRIMARY KEY,
+        pro_id INTEGER,
+        client_id INTEGER,
+        note INTEGER,
+        commentaire TEXT,
+        date TEXT,
+        FOREIGN KEY (pro_id) REFERENCES users(id),
+        FOREIGN KEY (client_id) REFERENCES users(id)
+    );
     ''')
-    conn.commit()
+    try:
+        conn.execute('ALTER TABLE users ADD COLUMN localisation TEXT')
+        conn.commit()
+    except:
+        pass
 
 if __name__ == '__main__':
     init_db()
