@@ -71,11 +71,18 @@ def dashboard():
     user = conn.execute('SELECT * FROM users WHERE id = ?', (session['user_id'],)).fetchone()
     if user['role'] == 'pro':
         rdvs = conn.execute('''
-            SELECT r.date, u.name as client FROM rendezvous r
+            SELECT r.id, r.date, u.name as client FROM rendezvous r
             JOIN users u ON r.client_id = u.id WHERE r.pro_id = ?
+            ORDER BY r.date DESC
         ''', (user['id'],)).fetchall()
         return render_template('dashboard_pro.html', user=user, rdvs=rdvs)
-    return render_template('dashboard_user.html', user=user)
+    else:
+        rdvs = conn.execute('''
+            SELECT r.id, r.date, u.name as pro_name FROM rendezvous r
+            JOIN users u ON r.pro_id = u.id WHERE r.client_id = ?
+            ORDER BY r.date DESC
+        ''', (user['id'],)).fetchall()
+        return render_template('dashboard_user.html', user=user, rdvs=rdvs)
 
 @app.route('/professionals')
 def view_professionals():

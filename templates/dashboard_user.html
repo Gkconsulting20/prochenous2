@@ -1,4 +1,46 @@
 {% extends "base.html" %}{% block title %}Tableau de bord Utilisateur{% endblock %}{% block content %}
 <h3>Bienvenue {{ user.name }}</h3>
-<a href="{{ url_for('view_professionals') }}" class="btn btn-info mb-3">Voir les professionnels</a>
+<p class="text-muted">Gérez vos rendez-vous et trouvez de nouveaux professionnels</p>
+
+<div class="row mt-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5>📅 Mes rendez-vous</h5>
+            </div>
+            <div class="card-body">
+                {% if rdvs %}
+                    <div class="list-group">
+                        {% for rdv in rdvs %}
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>{{ rdv.pro_name }}</strong>
+                                <div class="text-muted">{{ rdv.date }}</div>
+                            </div>
+                            <form method="POST" action="{{ url_for('cancel_rdv', rdv_id=rdv.id) }}" style="display:inline;">
+                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Voulez-vous vraiment annuler ce rendez-vous?')">
+                                    ❌ Annuler
+                                </button>
+                            </form>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">Aucun rendez-vous pour le moment</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <h5>Trouver un professionnel</h5>
+                <p class="text-muted">Découvrez nos professionnels qualifiés</p>
+                <a href="{{ url_for('view_professionals') }}" class="btn btn-primary w-100">
+                    👥 Voir les professionnels
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
