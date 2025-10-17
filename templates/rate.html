@@ -1,0 +1,22 @@
+{% extends "base.html" %}{% block title %}Noter le professionnel{% endblock %}{% block content %}
+<h3>Noter {{ pro.name }}</h3>
+<form method="post">
+    <div class="mb-3">
+        <label class="form-label">Note</label>
+        <select class="form-control" name="note" required>
+            <option value="">Choisir une note</option>
+            <option value="5">⭐⭐⭐⭐⭐ Excellent</option>
+            <option value="4">⭐⭐⭐⭐ Très bien</option>
+            <option value="3">⭐⭐⭐ Bien</option>
+            <option value="2">⭐⭐ Moyen</option>
+            <option value="1">⭐ Mauvais</option>
+        </select>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Commentaire (optionnel)</label>
+        <textarea class="form-control" name="commentaire" rows="3"></textarea>
+    </div>
+    <button class="btn btn-success" type="submit">Envoyer l'avis</button>
+    <a href="{{ url_for('view_professionals') }}" class="btn btn-secondary">Annuler</a>
+</form>
+{% endblock %}

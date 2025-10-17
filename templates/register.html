@@ -1,14 +1,22 @@
 {% extends "base.html" %}{% block title %}Inscription{% endblock %}{% block content %}
 <h3>Inscription</h3>
-<form method="post">
-    <input class="form-control mb-2" type="text" name="name" placeholder="Nom complet" required>
+<form method="post" id="registerForm">
+    <input class="form-control mb-2" type="text" name="name" placeholder="Pseudo" required>
     <input class="form-control mb-2" type="email" name="email" placeholder="Email" required>
     <input class="form-control mb-2" type="password" name="password" placeholder="Mot de passe" required>
-    <select class="form-control mb-2" name="role" required>
+    <select class="form-control mb-2" name="role" id="role" required>
         <option value="">Choisir un rôle</option>
         <option value="user">Utilisateur</option>
         <option value="pro">Professionnel</option>
     </select>
+    <div id="localisationField" style="display:none;">
+        <input class="form-control mb-2" type="text" name="localisation" placeholder="Localisation (ex: Paris, Lyon, Marseille)">
+    </div>
     <button class="btn btn-success" type="submit">S'inscrire</button>
 </form>
+<script>
+document.getElementById('role').addEventListener('change', function() {
+    document.getElementById('localisationField').style.display = this.value === 'pro' ? 'block' : 'none';
+});
+</script>
 {% endblock %}
