@@ -1,4 +1,31 @@
 {% extends "base.html" %}{% block title %}Accueil{% endblock %}{% block content %}
-<h2 class="text-center">Bienvenue sur la plateforme de mise en relation</h2>
-<p class="text-center">Inscrivez-vous pour réserver un professionnel ou proposer vos services.</p>
+<div class="hero-section">
+    <h2>Bienvenue sur la plateforme de mise en relation</h2>
+    <p>Inscrivez-vous pour réserver un professionnel ou proposer vos services.</p>
+    <div class="d-flex justify-content-center gap-3 mt-4">
+        <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg">Commencer maintenant</a>
+        <a href="{{ url_for('view_professionals') }}" class="btn btn-outline-primary btn-lg">Voir les professionnels</a>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-4">
+        <div class="feature-box">
+            <h4>🔍 Trouvez des experts</h4>
+            <p>Découvrez des professionnels qualifiés près de chez vous avec notre système de notation.</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="feature-box">
+            <h4>📅 Réservez facilement</h4>
+            <p>Choisissez un créneau horaire disponible et confirmez votre rendez-vous en quelques clics.</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="feature-box">
+            <h4>⭐ Laissez votre avis</h4>
+            <p>Partagez votre expérience pour aider la communauté à faire les meilleurs choix.</p>
+        </div>
+    </div>
+</div>
 {% endblock %}
