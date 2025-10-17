@@ -30,9 +30,9 @@ def register():
 def login():
     if request.method == 'POST':
         conn = get_db()
-        user = conn.execute('SELECT * FROM users WHERE email = ? AND password = ?',
-                            (request.form['email'], request.form['password'])).fetchone()
-        if user:
+        user = conn.execute('SELECT * FROM users WHERE email = ?',
+                            (request.form['email'],)).fetchone()
+        if user and bcrypt.checkpw(request.form['password'].encode('utf-8'), user['password']):
             session['user_id'] = user['id']
             session['role'] = user['role']
             return redirect(url_for('dashboard'))
