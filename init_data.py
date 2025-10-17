@@ -1,6 +1,10 @@
 import sqlite3
 from datetime import datetime, timedelta
 import random
+import bcrypt
+
+def hash_password(password):
+    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
 
 def init_default_data():
     conn = sqlite3.connect('database.db')
@@ -28,7 +32,9 @@ def init_default_data():
     ]
     
     for pro in professionals:
-        cursor.execute('INSERT INTO users (name, email, password, role, localisation) VALUES (?, ?, ?, ?, ?)', pro)
+        hashed_pwd = hash_password(pro[2])
+        cursor.execute('INSERT INTO users (name, email, password, role, localisation) VALUES (?, ?, ?, ?, ?)', 
+                      (pro[0], pro[1], hashed_pwd, pro[3], pro[4]))
     
     print("👤 Création des clients...")
     clients = [
@@ -38,7 +44,9 @@ def init_default_data():
     ]
     
     for client in clients:
-        cursor.execute('INSERT INTO users (name, email, password, role, localisation) VALUES (?, ?, ?, ?, ?)', client)
+        hashed_pwd = hash_password(client[2])
+        cursor.execute('INSERT INTO users (name, email, password, role, localisation) VALUES (?, ?, ?, ?, ?)', 
+                      (client[0], client[1], hashed_pwd, client[3], client[4]))
     
     conn.commit()
     
