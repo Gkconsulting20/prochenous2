@@ -17,36 +17,39 @@ def init_default_data():
     cursor.execute('DELETE FROM users')
     conn.commit()
     
-    print("👥 Création des professionnels...")
+    print("👥 Création des professionnels PRO CHEZ NOUS...")
+    # Format: (nom, email, mot_de_passe, role, localisation, catégorie)
     professionals = [
-        ('Sophie Martin', 'sophie.martin@example.com', 'demo123', 'pro', 'Paris 15e'),
-        ('Jean Dubois', 'jean.dubois@example.com', 'demo123', 'pro', 'Lyon 3e'),
-        ('Marie Lefebvre', 'marie.lefebvre@example.com', 'demo123', 'pro', 'Marseille Centre'),
-        ('Pierre Durant', 'pierre.durant@example.com', 'demo123', 'pro', 'Toulouse'),
-        ('Claire Bernard', 'claire.bernard@example.com', 'demo123', 'pro', 'Nice'),
-        ('Lucas Petit', 'lucas.petit@example.com', 'demo123', 'pro', 'Nantes'),
-        ('Emma Moreau', 'emma.moreau@example.com', 'demo123', 'pro', 'Bordeaux'),
-        ('Hugo Simon', 'hugo.simon@example.com', 'demo123', 'pro', 'Strasbourg'),
-        ('Léa Michel', 'lea.michel@example.com', 'demo123', 'pro', 'Lille'),
-        ('Thomas Blanc', 'thomas.blanc@example.com', 'demo123', 'pro', 'Rennes')
+        ('Marc Dupont', 'marc.plombier@prochesnous.fr', 'demo123', 'pro', 'Paris 15e', 'Plomberie'),
+        ('Sophie Électric', 'sophie.elec@prochesnous.fr', 'demo123', 'pro', 'Lyon 3e', 'Électricité'),
+        ('Jean Peinture', 'jean.peintre@prochesnous.fr', 'demo123', 'pro', 'Marseille', 'Peinture'),
+        ('Marie Bois', 'marie.menuisiere@prochesnous.fr', 'demo123', 'pro', 'Toulouse', 'Menuiserie'),
+        ('Pierre Maçon', 'pierre.macon@prochesnous.fr', 'demo123', 'pro', 'Nice', 'Maçonnerie'),
+        ('Claire Rénov', 'claire.renov@prochesnous.fr', 'demo123', 'pro', 'Nantes', 'Rénovation'),
+        ('Lucas Vitrier', 'lucas.vitrier@prochesnous.fr', 'demo123', 'pro', 'Bordeaux', 'Vitrerie'),
+        ('Emma Jardin', 'emma.jardin@prochesnous.fr', 'demo123', 'pro', 'Strasbourg', 'Jardinage'),
+        ('Hugo Serrure', 'hugo.serrurier@prochesnous.fr', 'demo123', 'pro', 'Lille', 'Serrurerie'),
+        ('Léa Toiture', 'lea.couvreur@prochesnous.fr', 'demo123', 'pro', 'Rennes', 'Toiture'),
+        ('Thomas Chauffage', 'thomas.chauffage@prochesnous.fr', 'demo123', 'pro', 'Paris 11e', 'Autre'),
+        ('Nadia Nettoyage', 'nadia.nettoyage@prochesnous.fr', 'demo123', 'pro', 'Lyon 7e', 'Autre')
     ]
     
     for pro in professionals:
         hashed_pwd = hash_password(pro[2])
-        cursor.execute('INSERT INTO users (name, email, password, role, localisation) VALUES (?, ?, ?, ?, ?)', 
-                      (pro[0], pro[1], hashed_pwd, pro[3], pro[4]))
+        cursor.execute('INSERT INTO users (name, email, password, role, localisation, categorie) VALUES (?, ?, ?, ?, ?, ?)', 
+                      (pro[0], pro[1], hashed_pwd, pro[3], pro[4], pro[5]))
     
     print("👤 Création des clients...")
     clients = [
-        ('Client Demo', 'client@example.com', 'demo123', 'user', None),
-        ('Alice Dupont', 'alice@example.com', 'demo123', 'user', None),
-        ('Bob Martin', 'bob@example.com', 'demo123', 'user', None)
+        ('Client Demo', 'client@example.com', 'demo123', 'user', None, None),
+        ('Alice Dupont', 'alice@example.com', 'demo123', 'user', None, None),
+        ('Bob Martin', 'bob@example.com', 'demo123', 'user', None, None)
     ]
     
     for client in clients:
         hashed_pwd = hash_password(client[2])
-        cursor.execute('INSERT INTO users (name, email, password, role, localisation) VALUES (?, ?, ?, ?, ?)', 
-                      (client[0], client[1], hashed_pwd, client[3], client[4]))
+        cursor.execute('INSERT INTO users (name, email, password, role, localisation, categorie) VALUES (?, ?, ?, ?, ?, ?)', 
+                      (client[0], client[1], hashed_pwd, client[3], client[4], client[5]))
     
     conn.commit()
     
