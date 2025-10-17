@@ -132,6 +132,7 @@ def book(pro_id):
                      (session['user_id'], slot_id))
         conn.execute('DELETE FROM slots WHERE id = ?', (slot_id,))
         conn.commit()
+        flash('Rendez-vous réservé avec succès!', 'success')
         return redirect(url_for('dashboard'))
     pro = conn.execute('SELECT * FROM users WHERE id = ?', (pro_id,)).fetchone()
     slots = conn.execute('SELECT * FROM slots WHERE pro_id = ?', (pro_id,)).fetchall()
@@ -165,9 +166,28 @@ def rate(pro_id):
     pro = conn.execute('SELECT * FROM users WHERE id = ?', (pro_id,)).fetchone()
     return render_template('rate.html', pro=pro)
 
+@app.route('/cancel_rdv/<int:rdv_id>', methods=['POST'])
+def cancel_rdv(rdv_id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    conn = get_db()
+    rdv = conn.execute('SELECT * FROM rendezvous WHERE id = ?', (rdv_id,)).fetchone()
+    
+    if rdv and (rdv['client_id'] == session['user_id'] or rdv['pro_id'] == session['user_id']):
+        conn.execute('INSERT INTO slots (pro_id, date) VALUES (?, ?)', (rdv['pro_id'], rdv['date']))
+        conn.execute('DELETE FROM rendezvous WHERE id = ?', (rdv_id,))
+        conn.commit()
+        flash('Rendez-vous annulé avec succès. Le créneau est à nouveau disponible.', 'success')
+    else:
+        flash('Impossible d\'annuler ce rendez-vous', 'error')
+    
+    return redirect(url_for('dashboard'))
+
 @app.route('/logout')
 def logout():
     session.clear()
+    flash('Vous êtes déconnecté', 'info')
     return redirect(url_for('index'))
 
 def init_db():
