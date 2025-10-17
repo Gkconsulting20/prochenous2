@@ -1,9 +1,10 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, flash
 import sqlite3
 import bcrypt
+import os
 
 app = Flask(__name__)
-app.secret_key = 'secret'
+app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
 
 def get_db():
     conn = sqlite3.connect('database.db')
@@ -17,25 +18,50 @@ def index():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
+        name = request.form.get('name', '').strip()
+        email = request.form.get('email', '').strip()
+        password = request.form.get('password', '').strip()
+        role = request.form.get('role', '').strip()
+        localisation = request.form.get('localisation', '').strip()
+        
+        if not name or not email or not password or not role:
+            flash('Tous les champs obligatoires doivent être remplis', 'error')
+            return render_template('register.html')
+        
         conn = get_db()
-        localisation = request.form.get('localisation', '')
-        hashed_password = bcrypt.hashpw(request.form['password'].encode('utf-8'), bcrypt.gensalt())
+        existing_user = conn.execute('SELECT * FROM users WHERE email = ?', (email,)).fetchone()
+        if existing_user:
+            flash('Cette adresse email est déjà utilisée', 'error')
+            return render_template('register.html')
+        
+        hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
         conn.execute('INSERT INTO users (name, email, password, role, localisation) VALUES (?, ?, ?, ?, ?)',
-                     (request.form['name'], request.form['email'], hashed_password, request.form['role'], localisation))
+                     (name, email, hashed_password, role, localisation))
         conn.commit()
+        flash('Inscription réussie! Vous pouvez maintenant vous connecter', 'success')
         return redirect(url_for('login'))
     return render_template('register.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
+        email = request.form.get('email', '').strip()
+        password = request.form.get('password', '').strip()
+        
+        if not email or not password:
+            flash('Veuillez remplir tous les champs', 'error')
+            return render_template('login.html')
+        
         conn = get_db()
-        user = conn.execute('SELECT * FROM users WHERE email = ?',
-                            (request.form['email'],)).fetchone()
-        if user and bcrypt.checkpw(request.form['password'].encode('utf-8'), user['password']):
+        user = conn.execute('SELECT * FROM users WHERE email = ?', (email,)).fetchone()
+        
+        if user and bcrypt.checkpw(password.encode('utf-8'), user['password']):
             session['user_id'] = user['id']
             session['role'] = user['role']
+            flash(f'Bienvenue {user["name"]}!', 'success')
             return redirect(url_for('dashboard'))
+        else:
+            flash('Email ou mot de passe incorrect', 'error')
     return render_template('login.html')
 
 @app.route('/dashboard')
