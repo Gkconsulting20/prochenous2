@@ -195,7 +195,7 @@ def init_db():
     conn.executescript('''
     CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY,
-        name TEXT, email TEXT, password TEXT, role TEXT, localisation TEXT
+        name TEXT, email TEXT, password TEXT, role TEXT, localisation TEXT, categorie TEXT
     );
     CREATE TABLE IF NOT EXISTS slots (
         id INTEGER PRIMARY KEY,
@@ -218,6 +218,11 @@ def init_db():
     ''')
     try:
         conn.execute('ALTER TABLE users ADD COLUMN localisation TEXT')
+        conn.commit()
+    except:
+        pass
+    try:
+        conn.execute('ALTER TABLE users ADD COLUMN categorie TEXT')
         conn.commit()
     except:
         pass
