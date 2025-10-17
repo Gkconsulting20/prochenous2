@@ -9,13 +9,21 @@
         <h5 class="mb-3">🔍 Rechercher et filtrer</h5>
         <form method="GET" action="{{ url_for('view_professionals') }}">
             <div class="row g-3">
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <input type="text" class="form-control" name="search" placeholder="Nom du professionnel..." value="{{ request.args.get('search', '') }}">
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <input type="text" class="form-control" name="ville" placeholder="Ville..." value="{{ request.args.get('ville', '') }}">
                 </div>
                 <div class="col-md-3">
+                    <select class="form-select" name="categorie">
+                        <option value="">Tous les métiers</option>
+                        {% for cat in categories %}
+                        <option value="{{ cat }}" {% if request.args.get('categorie') == cat %}selected{% endif %}>{{ cat }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
                     <select class="form-select" name="note_min">
                         <option value="">Note minimale</option>
                         <option value="5" {% if request.args.get('note_min') == '5' %}selected{% endif %}>⭐⭐⭐⭐⭐ (5/5)</option>
@@ -27,7 +35,7 @@
                     <button type="submit" class="btn btn-primary w-100">Filtrer</button>
                 </div>
             </div>
-            {% if request.args.get('search') or request.args.get('ville') or request.args.get('note_min') %}
+            {% if request.args.get('search') or request.args.get('ville') or request.args.get('note_min') or request.args.get('categorie') %}
             <div class="mt-2">
                 <a href="{{ url_for('view_professionals') }}" class="btn btn-sm btn-outline-secondary">
                     ❌ Réinitialiser les filtres
@@ -45,6 +53,12 @@
         <div class="card professional-card h-100">
             <div class="card-body">
                 <div class="professional-name">{{ pro.name }}</div>
+                
+                {% if pro.categorie %}
+                <div class="mb-2">
+                    <span class="badge bg-primary">{{ pro.categorie }}</span>
+                </div>
+                {% endif %}
                 
                 {% if pro.localisation %}
                 <div class="professional-location">

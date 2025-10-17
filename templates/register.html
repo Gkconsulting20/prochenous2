@@ -9,14 +9,20 @@
         <option value="user">Utilisateur</option>
         <option value="pro">Professionnel</option>
     </select>
-    <div id="localisationField" style="display:none;">
+    <div id="proFields" style="display:none;">
         <input class="form-control mb-2" type="text" name="localisation" placeholder="Localisation (ex: Paris, Lyon, Marseille)">
+        <select class="form-control mb-2" name="categorie" id="categorie">
+            <option value="">Choisir votre métier</option>
+            {% for cat in categories %}
+            <option value="{{ cat }}">{{ cat }}</option>
+            {% endfor %}
+        </select>
     </div>
     <button class="btn btn-success" type="submit">S'inscrire</button>
 </form>
 <script>
 document.getElementById('role').addEventListener('change', function() {
-    document.getElementById('localisationField').style.display = this.value === 'pro' ? 'block' : 'none';
+    document.getElementById('proFields').style.display = this.value === 'pro' ? 'block' : 'none';
 });
 </script>
 {% endblock %}

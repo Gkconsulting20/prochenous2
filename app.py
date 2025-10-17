@@ -17,30 +17,33 @@ def index():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+    categories = ['Plomberie', 'Électricité', 'Peinture', 'Menuiserie', 'Maçonnerie', 
+                  'Rénovation', 'Vitrerie', 'Jardinage', 'Serrurerie', 'Toiture', 'Autre']
     if request.method == 'POST':
         name = request.form.get('name', '').strip()
         email = request.form.get('email', '').strip()
         password = request.form.get('password', '').strip()
         role = request.form.get('role', '').strip()
         localisation = request.form.get('localisation', '').strip()
+        categorie = request.form.get('categorie', '').strip() if role == 'pro' else None
         
         if not name or not email or not password or not role:
             flash('Tous les champs obligatoires doivent être remplis', 'error')
-            return render_template('register.html')
+            return render_template('register.html', categories=categories)
         
         conn = get_db()
         existing_user = conn.execute('SELECT * FROM users WHERE email = ?', (email,)).fetchone()
         if existing_user:
             flash('Cette adresse email est déjà utilisée', 'error')
-            return render_template('register.html')
+            return render_template('register.html', categories=categories)
         
         hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
-        conn.execute('INSERT INTO users (name, email, password, role, localisation) VALUES (?, ?, ?, ?, ?)',
-                     (name, email, hashed_password, role, localisation))
+        conn.execute('INSERT INTO users (name, email, password, role, localisation, categorie) VALUES (?, ?, ?, ?, ?, ?)',
+                     (name, email, hashed_password, role, localisation, categorie))
         conn.commit()
         flash('Inscription réussie! Vous pouvez maintenant vous connecter', 'success')
         return redirect(url_for('login'))
-    return render_template('register.html')
+    return render_template('register.html', categories=categories)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -87,13 +90,16 @@ def dashboard():
 @app.route('/professionals')
 def view_professionals():
     conn = get_db()
+    categories = ['Plomberie', 'Électricité', 'Peinture', 'Menuiserie', 'Maçonnerie', 
+                  'Rénovation', 'Vitrerie', 'Jardinage', 'Serrurerie', 'Toiture', 'Autre']
     
     search = request.args.get('search', '').strip()
     ville = request.args.get('ville', '').strip()
     note_min = request.args.get('note_min', '').strip()
+    categorie = request.args.get('categorie', '').strip()
     
     query = '''
-        SELECT u.id, u.name, u.localisation,
+        SELECT u.id, u.name, u.localisation, u.categorie,
                COALESCE(AVG(a.note), 0) as note_moyenne,
                COUNT(a.id) as nb_avis
         FROM users u
@@ -111,6 +117,10 @@ def view_professionals():
         query += ' AND u.localisation LIKE ?'
         params.append(f'%{ville}%')
     
+    if categorie:
+        query += ' AND u.categorie = ?'
+        params.append(categorie)
+    
     query += ' GROUP BY u.id'
     
     if note_min:
@@ -120,7 +130,7 @@ def view_professionals():
     query += ' ORDER BY note_moyenne DESC'
     
     pros = conn.execute(query, params).fetchall()
-    return render_template('professionals.html', professionals=pros)
+    return render_template('professionals.html', professionals=pros, categories=categories)
 
 @app.route('/book/<int:pro_id>', methods=['GET', 'POST'])
 def book(pro_id):
