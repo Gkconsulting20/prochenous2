@@ -1,17 +1,17 @@
 :root {
-    --primary-color: #2563eb;
-    --primary-dark: #1d4ed8;
-    --secondary-color: #10b981;
+    --primary-color: #1e40af;
+    --primary-dark: #1e3a8a;
+    --secondary-color: #3b82f6;
     --text-dark: #1f2937;
     --text-light: #6b7280;
     --border-color: #e5e7eb;
-    --bg-light: #f9fafb;
+    --bg-light: #f0f9ff;
 }
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     color: var(--text-dark);
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
     min-height: 100vh;
 }
 
@@ -77,9 +77,9 @@ body {
 }
 
 .btn-success:hover {
-    background: #059669;
+    background: var(--primary-color);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
 }
 
 .form-control {
