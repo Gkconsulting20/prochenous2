@@ -54,16 +54,39 @@ def dashboard():
 @app.route('/professionals')
 def view_professionals():
     conn = get_db()
-    pros = conn.execute('''
+    
+    search = request.args.get('search', '').strip()
+    ville = request.args.get('ville', '').strip()
+    note_min = request.args.get('note_min', '').strip()
+    
+    query = '''
         SELECT u.id, u.name, u.localisation,
                COALESCE(AVG(a.note), 0) as note_moyenne,
                COUNT(a.id) as nb_avis
         FROM users u
         LEFT JOIN avis a ON u.id = a.pro_id
         WHERE u.role = 'pro'
-        GROUP BY u.id
-        ORDER BY note_moyenne DESC
-    ''').fetchall()
+    '''
+    
+    params = []
+    
+    if search:
+        query += ' AND u.name LIKE ?'
+        params.append(f'%{search}%')
+    
+    if ville:
+        query += ' AND u.localisation LIKE ?'
+        params.append(f'%{ville}%')
+    
+    query += ' GROUP BY u.id'
+    
+    if note_min:
+        query += ' HAVING note_moyenne >= ?'
+        params.append(float(note_min))
+    
+    query += ' ORDER BY note_moyenne DESC'
+    
+    pros = conn.execute(query, params).fetchall()
     return render_template('professionals.html', professionals=pros)
 
 @app.route('/book/<int:pro_id>', methods=['GET', 'POST'])
