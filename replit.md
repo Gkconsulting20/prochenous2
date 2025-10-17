@@ -1,7 +1,7 @@
-# Plateforme de Mise en Relation
+# PRO CHEZ NOUS
 
 ## Overview
-A French professional appointment booking platform built with Flask. The application allows users to register as clients or professionals, with professionals offering available time slots and clients booking appointments.
+A French professional appointment booking platform specifically for manual trades (métiers manuels) built with Flask. The application allows clients to find and book appointments with tradespeople based on location, professional category, ratings, and availability.
 
 ## Project Type
 Flask web application with SQLite database
@@ -38,23 +38,47 @@ Flask web application with SQLite database
 ```
 
 ### Database Schema
-- **users**: id, name, email, password, role (client/pro), localisation
+- **users**: id, name, email, password, role (client/pro), localisation, categorie (professional trade)
 - **slots**: id, pro_id, date (available time slots)
 - **rendezvous**: id, pro_id, client_id, date (booked appointments)
 - **avis**: id, pro_id, client_id, note, commentaire, date (reviews/ratings)
 
+### Professional Categories (Métiers Manuels)
+11 trade categories available:
+1. Plomberie
+2. Électricité
+3. Peinture
+4. Menuiserie
+5. Maçonnerie
+6. Rénovation
+7. Vitrerie
+8. Jardinage
+9. Serrurerie
+10. Toiture
+11. Autre
+
 ## Features
-1. User registration (client or professional)
-2. User authentication
+1. User registration (client or professional) with trade category selection
+2. User authentication with bcrypt password hashing
 3. Professional directory browsing with:
+   - Professional category/trade display (badges)
    - Geographic location display
    - Average rating and review count
    - Sorted by rating (best first)
    - Username display without contact details
-4. Appointment slot management (for professionals)
-5. Appointment booking (for clients)
-6. Rating system for professionals
-7. Dashboard views for both user types
+4. Advanced search and filtering:
+   - Filter by professional name
+   - Filter by city/location
+   - Filter by professional category/trade (11 categories)
+   - Filter by minimum rating
+5. Appointment slot management (for professionals)
+6. Appointment booking (for clients)
+7. Appointment cancellation (with slot restoration)
+8. Rating system for professionals
+9. Dashboard views for both user types with:
+   - List of upcoming and past appointments
+   - Cancellation functionality
+   - Professional statistics
 
 ## Setup and Configuration
 
@@ -73,14 +97,35 @@ Flask web application with SQLite database
 
 ## Recent Changes (October 17, 2025)
 
-### 🚀 Production-Ready Updates
+### 🏗️ Latest Update: Professional Categories & Branding
+- **Branding "PRO CHEZ NOUS":**
+  - ✅ Updated all templates with new platform name
+  - ✅ Changed from generic "Plateforme Pro" to "PRO CHEZ NOUS"
+  - ✅ Professional blue color scheme maintained
+  - ✅ 🏠 icon in navbar representing "home services"
+  
+- **Professional Categories System:**
+  - ✅ Added 'categorie' column to users table
+  - ✅ 11 manual trade categories (métiers manuels)
+  - ✅ Category selection in registration form for professionals
+  - ✅ Category badges displayed on professional cards
+  - ✅ Category filter in professional search
+  - ✅ Updated init_data.py with professional categories
+  
+- **Sample Data Updated:**
+  - ✅ 12 sample professionals with diverse trades
+  - ✅ Each professional assigned a specific trade category
+  - ✅ Geographic distribution across major French cities
+  - ✅ Test accounts: client@example.com / demo123
+
+### 🚀 Production-Ready Features (Previously Implemented)
 - **Sécurité complète:**
   - ✅ Hashage des mots de passe avec bcrypt
   - ✅ Clé secrète via variable d'environnement
   - ✅ Validation de tous les formulaires
   - ✅ Messages d'erreur informatifs
 - **Fonctionnalités avancées:**
-  - ✅ Recherche et filtrage (nom, ville, note)
+  - ✅ Recherche et filtrage (nom, ville, catégorie, note)
   - ✅ Affichage des rendez-vous pour clients ET professionnels
   - ✅ Annulation de rendez-vous (remet le créneau disponible)
   - ✅ Messages flash pour toutes les actions
