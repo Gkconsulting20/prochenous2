@@ -10,6 +10,50 @@ def init_default_data():
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
     
+    print("📊 Création des tables si nécessaire...")
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY,
+            name TEXT,
+            email TEXT UNIQUE,
+            password TEXT,
+            role TEXT,
+            localisation TEXT,
+            categorie TEXT
+        )
+    ''')
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS slots (
+            id INTEGER PRIMARY KEY,
+            pro_id INTEGER,
+            date TEXT,
+            FOREIGN KEY(pro_id) REFERENCES users(id)
+        )
+    ''')
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS rendezvous (
+            id INTEGER PRIMARY KEY,
+            pro_id INTEGER,
+            client_id INTEGER,
+            date TEXT,
+            FOREIGN KEY(pro_id) REFERENCES users(id),
+            FOREIGN KEY(client_id) REFERENCES users(id)
+        )
+    ''')
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS avis (
+            id INTEGER PRIMARY KEY,
+            pro_id INTEGER,
+            client_id INTEGER,
+            note INTEGER,
+            commentaire TEXT,
+            date TEXT,
+            FOREIGN KEY(pro_id) REFERENCES users(id),
+            FOREIGN KEY(client_id) REFERENCES users(id)
+        )
+    ''')
+    conn.commit()
+    
     print("🗑️  Nettoyage de la base de données...")
     cursor.execute('DELETE FROM avis')
     cursor.execute('DELETE FROM rendezvous')
