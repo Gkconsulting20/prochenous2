@@ -23,30 +23,37 @@ Flask web application with SQLite database
 ├── templates/            # HTML templates
 │   ├── base.html        # Base template
 │   ├── index.html       # Landing page
-│   ├── register.html    # User registration
+│   ├── register.html    # User registration (with location field)
 │   ├── login.html       # User login
 │   ├── dashboard_user.html    # Client dashboard
 │   ├── dashboard_pro.html     # Professional dashboard
-│   ├── professionals.html     # List of professionals
+│   ├── professionals.html     # List of professionals (with ratings)
 │   ├── book.html             # Booking interface
-│   └── add_slot.html         # Add time slots (pros only)
+│   ├── add_slot.html         # Add time slots (pros only)
+│   └── rate.html             # Rating form for professionals
 └── static/
     └── style.css        # Styling
 
 ```
 
 ### Database Schema
-- **users**: id, name, email, password, role (client/pro)
+- **users**: id, name, email, password, role (client/pro), localisation
 - **slots**: id, pro_id, date (available time slots)
 - **rendezvous**: id, pro_id, client_id, date (booked appointments)
+- **avis**: id, pro_id, client_id, note, commentaire, date (reviews/ratings)
 
 ## Features
 1. User registration (client or professional)
 2. User authentication
-3. Professional directory browsing
+3. Professional directory browsing with:
+   - Geographic location display
+   - Average rating and review count
+   - Sorted by rating (best first)
+   - Username display without contact details
 4. Appointment slot management (for professionals)
 5. Appointment booking (for clients)
-6. Dashboard views for both user types
+6. Rating system for professionals
+7. Dashboard views for both user types
 
 ## Setup and Configuration
 
@@ -64,6 +71,8 @@ Flask web application with SQLite database
 - **TODO for Production**: Replace with production WSGI server (e.g., Gunicorn, Waitress)
 
 ## Recent Changes (October 17, 2025)
+
+### Initial Setup
 - Imported project from GitHub
 - Configured for Replit environment
 - Updated Flask app to bind to 0.0.0.0:5000 for proper port exposure
@@ -71,6 +80,22 @@ Flask web application with SQLite database
 - Initialized SQLite database
 - Configured development workflow
 - Set up deployment configuration
+
+### New Features Added
+- **Geographic Location**: Professionals can now add their location during registration
+- **Rating System**: 
+  - New "avis" table for storing ratings and reviews
+  - Clients can rate professionals (1-5 stars)
+  - Average rating and review count displayed on professional listings
+  - Professionals sorted by rating (best first)
+- **Improved Privacy**: 
+  - Display username/pseudo instead of full contact details
+  - Email addresses no longer visible in professional listings
+- **Enhanced UI**:
+  - Location field appears conditionally for professionals during registration
+  - Professional cards show location with 📍 icon
+  - Rating display with ⭐ icon and review count
+  - New rating form (rate.html) for clients to leave reviews
 
 ## User Preferences
 - Language: French (application interface)
