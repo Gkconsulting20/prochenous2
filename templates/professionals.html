@@ -4,6 +4,40 @@
     <p class="text-muted">Trouvez le professionnel idéal pour vos besoins</p>
 </div>
 
+<div class="card mb-4">
+    <div class="card-body">
+        <h5 class="mb-3">🔍 Rechercher et filtrer</h5>
+        <form method="GET" action="{{ url_for('view_professionals') }}">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <input type="text" class="form-control" name="search" placeholder="Nom du professionnel..." value="{{ request.args.get('search', '') }}">
+                </div>
+                <div class="col-md-3">
+                    <input type="text" class="form-control" name="ville" placeholder="Ville..." value="{{ request.args.get('ville', '') }}">
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" name="note_min">
+                        <option value="">Note minimale</option>
+                        <option value="5" {% if request.args.get('note_min') == '5' %}selected{% endif %}>⭐⭐⭐⭐⭐ (5/5)</option>
+                        <option value="4" {% if request.args.get('note_min') == '4' %}selected{% endif %}>⭐⭐⭐⭐ (4+/5)</option>
+                        <option value="3" {% if request.args.get('note_min') == '3' %}selected{% endif %}>⭐⭐⭐ (3+/5)</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">Filtrer</button>
+                </div>
+            </div>
+            {% if request.args.get('search') or request.args.get('ville') or request.args.get('note_min') %}
+            <div class="mt-2">
+                <a href="{{ url_for('view_professionals') }}" class="btn btn-sm btn-outline-secondary">
+                    ❌ Réinitialiser les filtres
+                </a>
+            </div>
+            {% endif %}
+        </form>
+    </div>
+</div>
+
 {% if professionals %}
 <div class="row">
 {% for pro in professionals %}
