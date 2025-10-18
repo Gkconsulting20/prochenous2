@@ -7,7 +7,12 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <div>
-                        <h3 class="mb-1">{{ pro.name }}</h3>
+                        <h3 class="mb-1">
+                            {{ pro.name }}
+                            {% if pro.statut_verification == 'verifie' %}
+                            <span class="badge bg-success" title="Identité vérifiée">✓ Vérifié</span>
+                            {% endif %}
+                        </h3>
                         <span class="badge bg-primary me-2">{{ pro.categorie }}</span>
                         {% if pro.plan == 'premium' %}
                         <span class="badge bg-warning">⭐ Premium</span>

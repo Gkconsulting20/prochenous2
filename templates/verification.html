@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}Vérification d'identité{% endblock %}
+{% block content %}
+<h3>🔐 Vérification d'identité professionnelle</h3>
+
+<div class="row">
+    <div class="col-md-8">
+        {% if user.statut_verification == 'verifie' %}
+        <div class="alert alert-success">
+            <strong>✅ Votre profil est vérifié!</strong> Vous bénéficiez d'un badge de confiance sur votre profil.
+        </div>
+        {% elif user.statut_verification == 'en_attente' %}
+        <div class="alert alert-warning">
+            <strong>⏳ Vérification en cours</strong> Vos documents sont en cours de validation.
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            <strong>📋 Faites vérifier votre profil</strong>
+            <p class="mb-0">Uploadez vos diplômes, certifications ou documents professionnels pour obtenir le badge "Vérifié" et gagner la confiance des clients.</p>
+        </div>
+        {% endif %}
+        
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">📤 Uploader un document</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('upload_document') }}" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="type_document" class="form-label">Type de document</label>
+                        <select class="form-select" name="type_document" id="type_document" required>
+                            <option value="">Choisir le type...</option>
+                            <option value="diplome">📜 Diplôme</option>
+                            <option value="certificat">🏆 Certificat professionnel</option>
+                            <option value="carte_pro">💳 Carte professionnelle</option>
+                            <option value="kbis">📋 Extrait Kbis</option>
+                            <option value="assurance">🛡️ Attestation d'assurance</option>
+                            <option value="piece_identite">🪪 Pièce d'identité</option>
+                            <option value="autre">📄 Autre document</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="document" class="form-label">Fichier (PDF, JPG, PNG - Max 16MB)</label>
+                        <input type="file" class="form-control" name="document" id="document" accept=".pdf,.jpg,.jpeg,.png" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">📤 Uploader le document</button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">📁 Mes documents uploadés</h5>
+            </div>
+            <div class="card-body">
+                {% if documents %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Type</th>
+                                <th>Fichier</th>
+                                <th>Date</th>
+                                <th>Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for doc in documents %}
+                            <tr>
+                                <td>{{ doc.type_document }}</td>
+                                <td>{{ doc.nom_fichier }}</td>
+                                <td>{{ doc.date_upload }}</td>
+                                <td>
+                                    {% if doc.statut == 'valide' %}
+                                    <span class="badge bg-success">✅ Validé</span>
+                                    {% elif doc.statut == 'refuse' %}
+                                    <span class="badge bg-danger">❌ Refusé</span>
+                                    {% else %}
+                                    <span class="badge bg-warning">⏳ En attente</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted">Aucun document uploadé pour le moment.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5>💡 Pourquoi se faire vérifier ?</h5>
+                <ul class="list-unstyled">
+                    <li class="mb-2">✅ Badge "Vérifié" sur votre profil</li>
+                    <li class="mb-2">🔝 Meilleure visibilité dans les recherches</li>
+                    <li class="mb-2">🤝 Plus de confiance des clients</li>
+                    <li class="mb-2">⭐ Plus de réservations</li>
+                </ul>
+                
+                <h5 class="mt-4">📋 Documents acceptés</h5>
+                <ul class="small">
+                    <li>Diplômes professionnels</li>
+                    <li>Certifications métiers</li>
+                    <li>Carte professionnelle</li>
+                    <li>Extrait Kbis (entreprises)</li>
+                    <li>Attestation d'assurance professionnelle</li>
+                    <li>Pièce d'identité</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

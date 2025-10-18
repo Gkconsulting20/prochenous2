@@ -24,9 +24,12 @@
             {% if session.role == 'user' %}
             <li class="nav-item"><a class="nav-link" href="{{ url_for('view_professionals') }}">👥 Professionnels</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ url_for('favoris') }}">⭐ Favoris</a></li>
+            {% elif session.role == 'pro' %}
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('verification') }}">🔐 Vérification</a></li>
             {% endif %}
             <li class="nav-item"><a class="nav-link" href="{{ url_for('messages') }}">💬 Messages</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ url_for('subscription') }}">💎 Abonnement</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('admin_verification') }}">🔐 Admin</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}">🚪 Déconnexion</a></li>
         {% else %}
             <li class="nav-item"><a class="nav-link" href="{{ url_for('view_professionals') }}">👥 Professionnels</a></li>

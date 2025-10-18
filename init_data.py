@@ -20,7 +20,8 @@ def init_default_data():
             role TEXT,
             localisation TEXT,
             categorie TEXT,
-            plan TEXT DEFAULT 'gratuit'
+            plan TEXT DEFAULT 'gratuit',
+            statut_verification TEXT DEFAULT 'non_verifie'
         )
     ''')
     cursor.execute('''
@@ -87,9 +88,22 @@ def init_default_data():
             FOREIGN KEY(pro_id) REFERENCES users(id)
         )
     ''')
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS documents_verification (
+            id INTEGER PRIMARY KEY,
+            pro_id INTEGER,
+            type_document TEXT,
+            nom_fichier TEXT,
+            chemin_fichier TEXT,
+            date_upload TEXT,
+            statut TEXT DEFAULT 'en_attente',
+            FOREIGN KEY(pro_id) REFERENCES users(id)
+        )
+    ''')
     conn.commit()
     
     print("🗑️  Nettoyage de la base de données...")
+    cursor.execute('DELETE FROM documents_verification')
     cursor.execute('DELETE FROM favoris')
     cursor.execute('DELETE FROM messages')
     cursor.execute('DELETE FROM profils_pro')

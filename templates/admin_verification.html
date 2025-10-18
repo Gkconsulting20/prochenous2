@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Administration - Vérification{% endblock %}
+{% block content %}
+<h3>🔐 Administration - Validation des documents</h3>
+
+<div class="card">
+    <div class="card-header bg-warning text-dark">
+        <h5 class="mb-0">📋 Documents en attente de validation ({{ documents|length }})</h5>
+    </div>
+    <div class="card-body">
+        {% if documents %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Professionnel</th>
+                        <th>Email</th>
+                        <th>Métier</th>
+                        <th>Type document</th>
+                        <th>Fichier</th>
+                        <th>Date upload</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for doc in documents %}
+                    <tr>
+                        <td><strong>{{ doc.name }}</strong></td>
+                        <td>{{ doc.email }}</td>
+                        <td><span class="badge bg-primary">{{ doc.categorie }}</span></td>
+                        <td>{{ doc.type_document }}</td>
+                        <td>
+                            <a href="{{ url_for('static', filename='documents_verification/' + doc.chemin_fichier) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                👁️ Voir
+                            </a>
+                        </td>
+                        <td>{{ doc.date_upload }}</td>
+                        <td>
+                            <form method="POST" action="{{ url_for('valider_document', doc_id=doc.id) }}" class="d-inline">
+                                <button type="submit" name="action" value="valider" class="btn btn-sm btn-success">
+                                    ✅ Valider
+                                </button>
+                                <button type="submit" name="action" value="refuser" class="btn btn-sm btn-danger">
+                                    ❌ Refuser
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            Aucun document en attente de validation.
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="alert alert-warning mt-4">
+    <strong>⚠️ Note:</strong> Cette page est accessible à tous les utilisateurs connectés pour la démonstration. En production, elle devrait être réservée aux administrateurs uniquement.
+</div>
+{% endblock %}

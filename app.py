@@ -1,10 +1,20 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_from_directory
+from werkzeug.utils import secure_filename
 import sqlite3
 import bcrypt
 import os
+from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
+
+UPLOAD_FOLDER = 'static/documents_verification'
+ALLOWED_EXTENSIONS = {'pdf', 'jpg', 'jpeg', 'png'}
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def get_db():
     conn = sqlite3.connect('database.db')
@@ -139,7 +149,7 @@ def view_professionals():
     categorie = request.args.get('categorie', '').strip()
     
     query = '''
-        SELECT u.id, u.name, u.localisation, u.categorie,
+        SELECT u.id, u.name, u.localisation, u.categorie, u.plan, u.statut_verification,
                COALESCE(AVG(a.note), 0) as note_moyenne,
                COUNT(a.id) as nb_avis
         FROM users u
@@ -388,6 +398,115 @@ def logout():
     session.clear()
     flash('Vous êtes déconnecté', 'info')
     return redirect(url_for('index'))
+
+@app.route('/verification')
+def verification():
+    if 'user_id' not in session or session.get('role') != 'pro':
+        flash('Cette page est réservée aux professionnels', 'error')
+        return redirect(url_for('index'))
+    
+    conn = get_db()
+    user = conn.execute('SELECT * FROM users WHERE id = ?', (session['user_id'],)).fetchone()
+    documents = conn.execute('''
+        SELECT * FROM documents_verification 
+        WHERE pro_id = ? 
+        ORDER BY date_upload DESC
+    ''', (session['user_id'],)).fetchall()
+    
+    return render_template('verification.html', user=user, documents=documents)
+
+@app.route('/upload_document', methods=['POST'])
+def upload_document():
+    if 'user_id' not in session or session.get('role') != 'pro':
+        flash('Cette page est réservée aux professionnels', 'error')
+        return redirect(url_for('index'))
+    
+    if 'document' not in request.files:
+        flash('Aucun fichier sélectionné', 'error')
+        return redirect(url_for('verification'))
+    
+    file = request.files['document']
+    type_document = request.form.get('type_document', '').strip()
+    
+    if file.filename == '':
+        flash('Aucun fichier sélectionné', 'error')
+        return redirect(url_for('verification'))
+    
+    if not type_document:
+        flash('Veuillez sélectionner le type de document', 'error')
+        return redirect(url_for('verification'))
+    
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        new_filename = f"{session['user_id']}_{timestamp}_{filename}"
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], new_filename)
+        file.save(filepath)
+        
+        conn = get_db()
+        conn.execute('''
+            INSERT INTO documents_verification (pro_id, type_document, nom_fichier, chemin_fichier, date_upload, statut)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ''', (session['user_id'], type_document, filename, new_filename, datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'en_attente'))
+        conn.commit()
+        
+        flash('Document uploadé avec succès! Il sera vérifié prochainement.', 'success')
+    else:
+        flash('Type de fichier non autorisé. Formats acceptés: PDF, JPG, JPEG, PNG', 'error')
+    
+    return redirect(url_for('verification'))
+
+@app.route('/valider_verification/<int:pro_id>')
+def valider_verification(pro_id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    conn = get_db()
+    documents = conn.execute('SELECT COUNT(*) as nb FROM documents_verification WHERE pro_id = ? AND statut = "valide"', (pro_id,)).fetchone()
+    
+    if documents['nb'] > 0:
+        conn.execute('UPDATE users SET statut_verification = ? WHERE id = ?', ('verifie', pro_id))
+        conn.commit()
+        flash('Professionnel vérifié avec succès!', 'success')
+    
+    return redirect(url_for('profil', pro_id=pro_id))
+
+@app.route('/admin_verification')
+def admin_verification():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    conn = get_db()
+    documents_attente = conn.execute('''
+        SELECT d.*, u.name, u.email, u.categorie
+        FROM documents_verification d
+        JOIN users u ON d.pro_id = u.id
+        WHERE d.statut = 'en_attente'
+        ORDER BY d.date_upload DESC
+    ''').fetchall()
+    
+    return render_template('admin_verification.html', documents=documents_attente)
+
+@app.route('/valider_document/<int:doc_id>', methods=['POST'])
+def valider_document(doc_id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    action = request.form.get('action')
+    conn = get_db()
+    
+    if action == 'valider':
+        conn.execute('UPDATE documents_verification SET statut = ? WHERE id = ?', ('valide', doc_id))
+        document = conn.execute('SELECT pro_id FROM documents_verification WHERE id = ?', (doc_id,)).fetchone()
+        if document:
+            conn.execute('UPDATE users SET statut_verification = ? WHERE id = ?', ('verifie', document['pro_id']))
+        flash('Document validé avec succès!', 'success')
+    elif action == 'refuser':
+        conn.execute('UPDATE documents_verification SET statut = ? WHERE id = ?', ('refuse', doc_id))
+        flash('Document refusé', 'info')
+    
+    conn.commit()
+    return redirect(url_for('admin_verification'))
 
 def init_db():
     conn = get_db()

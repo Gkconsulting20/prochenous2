@@ -52,11 +52,19 @@
     <div class="col-md-6 col-lg-4 mb-4">
         <div class="card professional-card h-100">
             <div class="card-body">
-                <div class="professional-name">{{ pro.name }}</div>
+                <div class="professional-name">
+                    {{ pro.name }}
+                    {% if pro.statut_verification == 'verifie' %}
+                    <span class="badge bg-success ms-1" title="Identité vérifiée">✓ Vérifié</span>
+                    {% endif %}
+                </div>
                 
                 {% if pro.categorie %}
                 <div class="mb-2">
                     <span class="badge bg-primary">{{ pro.categorie }}</span>
+                    {% if pro.plan == 'premium' %}
+                    <span class="badge bg-warning ms-1">⭐ Premium</span>
+                    {% endif %}
                 </div>
                 {% endif %}
                 
