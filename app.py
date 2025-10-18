@@ -180,7 +180,96 @@ def view_professionals():
     query += ' ORDER BY note_moyenne DESC'
     
     pros = conn.execute(query, params).fetchall()
-    return render_template('professionals.html', professionals=pros, categories=categories)
+    
+    user = None
+    if 'user_id' in session:
+        user = conn.execute('SELECT * FROM users WHERE id = ?', (session['user_id'],)).fetchone()
+    
+    return render_template('professionals.html', professionals=pros, categories=categories, user=user)
+
+@app.route('/professionals_nearby')
+def professionals_nearby():
+    if 'user_id' not in session:
+        flash('Veuillez vous connecter pour accéder à cette fonctionnalité', 'error')
+        return redirect(url_for('login'))
+    
+    conn = get_db()
+    user = conn.execute('SELECT * FROM users WHERE id = ?', (session['user_id'],)).fetchone()
+    
+    if user['plan'] != 'premium':
+        flash('La géolocalisation est réservée aux membres Premium! Passez à Premium pour trouver les professionnels près de vous 📍', 'error')
+        return redirect(url_for('subscription'))
+    
+    lat = request.args.get('lat', type=float)
+    lon = request.args.get('lon', type=float)
+    
+    if not lat or not lon:
+        flash('Impossible de récupérer votre position', 'error')
+        return redirect(url_for('view_professionals'))
+    
+    import math
+    
+    def calculate_distance(lat1, lon1, lat2, lon2):
+        if lat2 is None or lon2 is None:
+            return float('inf')
+        R = 6371
+        dlat = math.radians(lat2 - lat1)
+        dlon = math.radians(lon2 - lon1)
+        a = math.sin(dlat/2) * math.sin(dlat/2) + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(dlon/2) * math.sin(dlon/2)
+        c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
+        return R * c
+    
+    categories = [
+        '🔧 Plomberie', '⚡ Électricité', '🎨 Peinture', '🪚 Menuiserie', '🧱 Maçonnerie',
+        '🏗️ Rénovation', '🪟 Vitrerie', '🔐 Serrurerie', '🏠 Toiture', '🪜 Couverture',
+        '🌳 Jardinage', '🌱 Paysagiste', '🌿 Élagage', '💧 Piscine',
+        '❄️ Climatisation', '🔥 Chauffage', '📡 Antenne/Parabole', '🚪 Portail/Clôture',
+        '🧹 Nettoyage', '🧽 Ménage à domicile', '🪟 Lavage vitres', '🧼 Pressing/Repassage',
+        '🚚 Déménagement', '📦 Livraison', '🚗 Transport', '🛵 Coursier',
+        '🔨 Bricolage', '⚙️ Dépannage', '🔧 Réparation électroménager', '📱 Réparation téléphone',
+        '💻 Informatique', '🖥️ Maintenance PC', '📶 Installation internet',
+        '✂️ Coiffure à domicile', '💅 Manucure', '💆 Massage', '👗 Couture/Retouche',
+        '🍳 Cuisinier à domicile', '🎂 Pâtisserie', '🍕 Traiteur', '☕ Barista',
+        '👶 Garde d\'enfants', '🧓 Aide à domicile', '🐕 Garde animaux', '🚶 Promenade chiens',
+        '🚗 Mécanicien auto', '🏍️ Mécanicien moto', '🔧 Carrosserie', '🚙 Lavage auto',
+        '📚 Soutien scolaire', '🎓 Formation', '🎸 Cours de musique', '🎨 Cours d\'art',
+        '📸 Photographe', '🎥 Vidéaste', '🎤 DJ/Sonorisation', '🎪 Animation événements',
+        '👔 Repassage', '🧺 Blanchisserie', '🪡 Tapissier', '🛋️ Rénovation meuble',
+        '🪴 Fleuriste', '🌺 Décoration florale', '🎀 Décoration événements',
+        '🔒 Sécurité', '👮 Gardiennage', '📹 Installation alarme',
+        '🏋️ Coach sportif', '🧘 Yoga/Pilates', '💪 Personal trainer',
+        '🐝 Apiculture', '🐓 Élevage', '🌾 Agriculture', '🥕 Maraîchage',
+        '🎪 Autres services'
+    ]
+    
+    pros = conn.execute('''
+        SELECT u.id, u.name, u.localisation, u.categorie, u.plan, u.statut_verification, u.latitude, u.longitude,
+               COALESCE(AVG(a.note), 0) as note_moyenne,
+               COUNT(a.id) as nb_avis
+        FROM users u
+        LEFT JOIN avis a ON u.id = a.pro_id
+        WHERE u.role = 'pro'
+        GROUP BY u.id
+    ''').fetchall()
+    
+    pros_with_distance = []
+    for pro in pros:
+        distance = calculate_distance(lat, lon, pro['latitude'], pro['longitude'])
+        pros_with_distance.append({
+            'id': pro['id'],
+            'name': pro['name'],
+            'localisation': pro['localisation'],
+            'categorie': pro['categorie'],
+            'plan': pro['plan'],
+            'statut_verification': pro['statut_verification'],
+            'note_moyenne': pro['note_moyenne'],
+            'nb_avis': pro['nb_avis'],
+            'distance': distance
+        })
+    
+    pros_with_distance.sort(key=lambda x: x['distance'])
+    
+    return render_template('professionals.html', professionals=pros_with_distance, categories=categories, user=user, nearby_mode=True)
 
 @app.route('/book/<int:pro_id>', methods=['GET', 'POST'])
 def book(pro_id):
