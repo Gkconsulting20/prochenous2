@@ -17,8 +17,28 @@ def index():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    categories = ['Plomberie', 'Électricité', 'Peinture', 'Menuiserie', 'Maçonnerie', 
-                  'Rénovation', 'Vitrerie', 'Jardinage', 'Serrurerie', 'Toiture', 'Autre']
+    categories = [
+        '🔧 Plomberie', '⚡ Électricité', '🎨 Peinture', '🪚 Menuiserie', '🧱 Maçonnerie',
+        '🏗️ Rénovation', '🪟 Vitrerie', '🔐 Serrurerie', '🏠 Toiture', '🪜 Couverture',
+        '🌳 Jardinage', '🌱 Paysagiste', '🌿 Élagage', '💧 Piscine',
+        '❄️ Climatisation', '🔥 Chauffage', '📡 Antenne/Parabole', '🚪 Portail/Clôture',
+        '🧹 Nettoyage', '🧽 Ménage à domicile', '🪟 Lavage vitres', '🧼 Pressing/Repassage',
+        '🚚 Déménagement', '📦 Livraison', '🚗 Transport', '🛵 Coursier',
+        '🔨 Bricolage', '⚙️ Dépannage', '🔧 Réparation électroménager', '📱 Réparation téléphone',
+        '💻 Informatique', '🖥️ Maintenance PC', '📶 Installation internet',
+        '✂️ Coiffure à domicile', '💅 Manucure', '💆 Massage', '👗 Couture/Retouche',
+        '🍳 Cuisinier à domicile', '🎂 Pâtisserie', '🍕 Traiteur', '☕ Barista',
+        '👶 Garde d\'enfants', '🧓 Aide à domicile', '🐕 Garde animaux', '🚶 Promenade chiens',
+        '🚗 Mécanicien auto', '🏍️ Mécanicien moto', '🔧 Carrosserie', '🚙 Lavage auto',
+        '📚 Soutien scolaire', '🎓 Formation', '🎸 Cours de musique', '🎨 Cours d\'art',
+        '📸 Photographe', '🎥 Vidéaste', '🎤 DJ/Sonorisation', '🎪 Animation événements',
+        '👔 Repassage', '🧺 Blanchisserie', '🪡 Tapissier', '🛋️ Rénovation meuble',
+        '🪴 Fleuriste', '🌺 Décoration florale', '🎀 Décoration événements',
+        '🔒 Sécurité', '👮 Gardiennage', '📹 Installation alarme',
+        '🏋️ Coach sportif', '🧘 Yoga/Pilates', '💪 Personal trainer',
+        '🐝 Apiculture', '🐓 Élevage', '🌾 Agriculture', '🥕 Maraîchage',
+        '🎪 Autres services'
+    ]
     if request.method == 'POST':
         name = request.form.get('name', '').strip()
         email = request.form.get('email', '').strip()
@@ -90,8 +110,28 @@ def dashboard():
 @app.route('/professionals')
 def view_professionals():
     conn = get_db()
-    categories = ['Plomberie', 'Électricité', 'Peinture', 'Menuiserie', 'Maçonnerie', 
-                  'Rénovation', 'Vitrerie', 'Jardinage', 'Serrurerie', 'Toiture', 'Autre']
+    categories = [
+        '🔧 Plomberie', '⚡ Électricité', '🎨 Peinture', '🪚 Menuiserie', '🧱 Maçonnerie',
+        '🏗️ Rénovation', '🪟 Vitrerie', '🔐 Serrurerie', '🏠 Toiture', '🪜 Couverture',
+        '🌳 Jardinage', '🌱 Paysagiste', '🌿 Élagage', '💧 Piscine',
+        '❄️ Climatisation', '🔥 Chauffage', '📡 Antenne/Parabole', '🚪 Portail/Clôture',
+        '🧹 Nettoyage', '🧽 Ménage à domicile', '🪟 Lavage vitres', '🧼 Pressing/Repassage',
+        '🚚 Déménagement', '📦 Livraison', '🚗 Transport', '🛵 Coursier',
+        '🔨 Bricolage', '⚙️ Dépannage', '🔧 Réparation électroménager', '📱 Réparation téléphone',
+        '💻 Informatique', '🖥️ Maintenance PC', '📶 Installation internet',
+        '✂️ Coiffure à domicile', '💅 Manucure', '💆 Massage', '👗 Couture/Retouche',
+        '🍳 Cuisinier à domicile', '🎂 Pâtisserie', '🍕 Traiteur', '☕ Barista',
+        '👶 Garde d\'enfants', '🧓 Aide à domicile', '🐕 Garde animaux', '🚶 Promenade chiens',
+        '🚗 Mécanicien auto', '🏍️ Mécanicien moto', '🔧 Carrosserie', '🚙 Lavage auto',
+        '📚 Soutien scolaire', '🎓 Formation', '🎸 Cours de musique', '🎨 Cours d\'art',
+        '📸 Photographe', '🎥 Vidéaste', '🎤 DJ/Sonorisation', '🎪 Animation événements',
+        '👔 Repassage', '🧺 Blanchisserie', '🪡 Tapissier', '🛋️ Rénovation meuble',
+        '🪴 Fleuriste', '🌺 Décoration florale', '🎀 Décoration événements',
+        '🔒 Sécurité', '👮 Gardiennage', '📹 Installation alarme',
+        '🏋️ Coach sportif', '🧘 Yoga/Pilates', '💪 Personal trainer',
+        '🐝 Apiculture', '🐓 Élevage', '🌾 Agriculture', '🥕 Maraîchage',
+        '🎪 Autres services'
+    ]
     
     search = request.args.get('search', '').strip()
     ville = request.args.get('ville', '').strip()
