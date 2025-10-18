@@ -19,7 +19,8 @@ def init_default_data():
             password TEXT,
             role TEXT,
             localisation TEXT,
-            categorie TEXT
+            categorie TEXT,
+            plan TEXT DEFAULT 'gratuit'
         )
     ''')
     cursor.execute('''
@@ -52,9 +53,46 @@ def init_default_data():
             FOREIGN KEY(client_id) REFERENCES users(id)
         )
     ''')
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS profils_pro (
+            id INTEGER PRIMARY KEY,
+            pro_id INTEGER UNIQUE,
+            description TEXT,
+            tarif_horaire TEXT,
+            experience TEXT,
+            certifications TEXT,
+            photo_url TEXT,
+            FOREIGN KEY(pro_id) REFERENCES users(id)
+        )
+    ''')
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS messages (
+            id INTEGER PRIMARY KEY,
+            expediteur_id INTEGER,
+            destinataire_id INTEGER,
+            contenu TEXT,
+            date TEXT,
+            lu INTEGER DEFAULT 0,
+            FOREIGN KEY(expediteur_id) REFERENCES users(id),
+            FOREIGN KEY(destinataire_id) REFERENCES users(id)
+        )
+    ''')
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS favoris (
+            id INTEGER PRIMARY KEY,
+            client_id INTEGER,
+            pro_id INTEGER,
+            date_ajout TEXT,
+            FOREIGN KEY(client_id) REFERENCES users(id),
+            FOREIGN KEY(pro_id) REFERENCES users(id)
+        )
+    ''')
     conn.commit()
     
     print("🗑️  Nettoyage de la base de données...")
+    cursor.execute('DELETE FROM favoris')
+    cursor.execute('DELETE FROM messages')
+    cursor.execute('DELETE FROM profils_pro')
     cursor.execute('DELETE FROM avis')
     cursor.execute('DELETE FROM rendezvous')
     cursor.execute('DELETE FROM slots')
@@ -62,38 +100,39 @@ def init_default_data():
     conn.commit()
     
     print("👥 Création des professionnels PRO CHEZ NOUS...")
-    # Format: (nom, email, mot_de_passe, role, localisation, catégorie)
+    # Format: (nom, email, mot_de_passe, role, localisation, catégorie, plan)
     professionals = [
-        ('Marc Dupont', 'marc.plombier@prochesnous.fr', 'demo123', 'pro', 'Paris 15e', 'Plomberie'),
-        ('Sophie Électric', 'sophie.elec@prochesnous.fr', 'demo123', 'pro', 'Lyon 3e', 'Électricité'),
-        ('Jean Peinture', 'jean.peintre@prochesnous.fr', 'demo123', 'pro', 'Marseille', 'Peinture'),
-        ('Marie Bois', 'marie.menuisiere@prochesnous.fr', 'demo123', 'pro', 'Toulouse', 'Menuiserie'),
-        ('Pierre Maçon', 'pierre.macon@prochesnous.fr', 'demo123', 'pro', 'Nice', 'Maçonnerie'),
-        ('Claire Rénov', 'claire.renov@prochesnous.fr', 'demo123', 'pro', 'Nantes', 'Rénovation'),
-        ('Lucas Vitrier', 'lucas.vitrier@prochesnous.fr', 'demo123', 'pro', 'Bordeaux', 'Vitrerie'),
-        ('Emma Jardin', 'emma.jardin@prochesnous.fr', 'demo123', 'pro', 'Strasbourg', 'Jardinage'),
-        ('Hugo Serrure', 'hugo.serrurier@prochesnous.fr', 'demo123', 'pro', 'Lille', 'Serrurerie'),
-        ('Léa Toiture', 'lea.couvreur@prochesnous.fr', 'demo123', 'pro', 'Rennes', 'Toiture'),
-        ('Thomas Chauffage', 'thomas.chauffage@prochesnous.fr', 'demo123', 'pro', 'Paris 11e', 'Autre'),
-        ('Nadia Nettoyage', 'nadia.nettoyage@prochesnous.fr', 'demo123', 'pro', 'Lyon 7e', 'Autre')
+        ('Marc Dupont', 'marc.plombier@prochesnous.fr', 'demo123', 'pro', 'Paris 15e', 'Plomberie', 'premium'),
+        ('Sophie Électric', 'sophie.elec@prochesnous.fr', 'demo123', 'pro', 'Lyon 3e', 'Électricité', 'premium'),
+        ('Jean Peinture', 'jean.peintre@prochesnous.fr', 'demo123', 'pro', 'Marseille', 'Peinture', 'gratuit'),
+        ('Marie Bois', 'marie.menuisiere@prochesnous.fr', 'demo123', 'pro', 'Toulouse', 'Menuiserie', 'premium'),
+        ('Pierre Maçon', 'pierre.macon@prochesnous.fr', 'demo123', 'pro', 'Nice', 'Maçonnerie', 'gratuit'),
+        ('Claire Rénov', 'claire.renov@prochesnous.fr', 'demo123', 'pro', 'Nantes', 'Rénovation', 'premium'),
+        ('Lucas Vitrier', 'lucas.vitrier@prochesnous.fr', 'demo123', 'pro', 'Bordeaux', 'Vitrerie', 'gratuit'),
+        ('Emma Jardin', 'emma.jardin@prochesnous.fr', 'demo123', 'pro', 'Strasbourg', 'Jardinage', 'premium'),
+        ('Hugo Serrure', 'hugo.serrurier@prochesnous.fr', 'demo123', 'pro', 'Lille', 'Serrurerie', 'gratuit'),
+        ('Léa Toiture', 'lea.couvreur@prochesnous.fr', 'demo123', 'pro', 'Rennes', 'Toiture', 'premium'),
+        ('Thomas Chauffage', 'thomas.chauffage@prochesnous.fr', 'demo123', 'pro', 'Paris 11e', 'Autre', 'gratuit'),
+        ('Nadia Nettoyage', 'nadia.nettoyage@prochesnous.fr', 'demo123', 'pro', 'Lyon 7e', 'Autre', 'gratuit')
     ]
     
     for pro in professionals:
         hashed_pwd = hash_password(pro[2])
-        cursor.execute('INSERT INTO users (name, email, password, role, localisation, categorie) VALUES (?, ?, ?, ?, ?, ?)', 
-                      (pro[0], pro[1], hashed_pwd, pro[3], pro[4], pro[5]))
+        cursor.execute('INSERT INTO users (name, email, password, role, localisation, categorie, plan) VALUES (?, ?, ?, ?, ?, ?, ?)', 
+                      (pro[0], pro[1], hashed_pwd, pro[3], pro[4], pro[5], pro[6]))
     
     print("👤 Création des clients...")
+    # Format: (nom, email, mot_de_passe, role, localisation, catégorie, plan)
     clients = [
-        ('Client Demo', 'client@example.com', 'demo123', 'user', None, None),
-        ('Alice Dupont', 'alice@example.com', 'demo123', 'user', None, None),
-        ('Bob Martin', 'bob@example.com', 'demo123', 'user', None, None)
+        ('Client Demo', 'client@example.com', 'demo123', 'user', None, None, 'premium'),
+        ('Alice Dupont', 'alice@example.com', 'demo123', 'user', None, None, 'gratuit'),
+        ('Bob Martin', 'bob@example.com', 'demo123', 'user', None, None, 'gratuit')
     ]
     
     for client in clients:
         hashed_pwd = hash_password(client[2])
-        cursor.execute('INSERT INTO users (name, email, password, role, localisation, categorie) VALUES (?, ?, ?, ?, ?, ?)', 
-                      (client[0], client[1], hashed_pwd, client[3], client[4], client[5]))
+        cursor.execute('INSERT INTO users (name, email, password, role, localisation, categorie, plan) VALUES (?, ?, ?, ?, ?, ?, ?)', 
+                      (client[0], client[1], hashed_pwd, client[3], client[4], client[5], client[6]))
     
     conn.commit()
     
@@ -136,6 +175,20 @@ def init_default_data():
     past_date = (datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d 10:00')
     cursor.execute('INSERT INTO rendezvous (pro_id, client_id, date) VALUES (?, ?, ?)', (1, 1, past_date))
     cursor.execute('INSERT INTO rendezvous (pro_id, client_id, date) VALUES (?, ?, ?)', (2, 2, past_date))
+    
+    print("💎 Ajout des profils enrichis pour les professionnels premium...")
+    profils_premium = [
+        (1, 'Plombier expérimenté spécialisé dans les installations sanitaires modernes. Interventions rapides et soignées.', '45€/h', '15 ans', 'Certification Qualibat, Assurance décennale'),
+        (2, 'Électricienne diplômée, spécialiste en domotique et systèmes électriques intelligents.', '50€/h', '10 ans', 'Certification Qualifelec, Habilitation électrique'),
+        (4, 'Menuisière passionnée, créations sur mesure en bois massif. Travail artisanal de qualité.', '42€/h', '12 ans', 'CAP Menuiserie, Artisan d\'Art'),
+        (6, 'Experte en rénovation complète d\'appartements et maisons. Coordination de tous les corps de métier.', '55€/h', '18 ans', 'Certification RGE, Assurance tous risques'),
+        (8, 'Paysagiste et jardinière professionnelle. Création et entretien d\'espaces verts.', '38€/h', '8 ans', 'Diplôme d\'État Paysagiste'),
+        (10, 'Couvreur expert en toiture traditionnelle et isolation. Garantie décennale.', '48€/h', '20 ans', 'Certification Qualibat, Expert ardoise et tuile')
+    ]
+    
+    for profil in profils_premium:
+        cursor.execute('INSERT INTO profils_pro (pro_id, description, tarif_horaire, experience, certifications) VALUES (?, ?, ?, ?, ?)', 
+                      profil)
     
     conn.commit()
     conn.close()
