@@ -44,13 +44,14 @@ Flask web application with SQLite database
 ```
 
 ### Database Schema
-- **users**: id, name, email, password, role (client/pro), localisation, categorie (professional trade), plan (gratuit/premium)
+- **users**: id, name, email, password, role (client/pro), localisation, categorie (professional trade), plan (gratuit/premium), statut_verification (non_verifie/en_attente/verifie), latitude, longitude (GPS coordinates)
 - **slots**: id, pro_id, date (available time slots)
 - **rendezvous**: id, pro_id, client_id, date (booked appointments)
 - **avis**: id, pro_id, client_id, note, commentaire, date (reviews/ratings)
 - **profils_pro**: id, user_id, description, tarif_horaire, experience, certifications, photos_url (premium profiles)
 - **messages**: id, expediteur_id, destinataire_id, contenu, date, lu (internal messaging)
 - **favoris**: id, user_id, pro_id, date_ajout (favorites list)
+- **documents_verification**: id, user_id, type_document, nom_fichier, date_upload, statut (en_attente/valide/refuse)
 
 ### Professional Categories (Métiers Manuels)
 11 trade categories available:
@@ -120,6 +121,15 @@ Flask web application with SQLite database
     - One-click upgrade
     - Premium badge on all listings
 
+15. **📍 Geolocation Feature:**
+    - "Près de moi" button visible only for premium users
+    - HTML5 Geolocation API integration
+    - Automatic distance calculation using Haversine formula
+    - Professionals sorted by proximity (nearest first)
+    - Distance displayed in kilometers on professional cards
+    - GPS coordinates stored for all professionals
+    - Premium-only access enforced
+
 ## Setup and Configuration
 
 ### Environment
@@ -137,7 +147,20 @@ Flask web application with SQLite database
 
 ## Recent Changes (October 18, 2025)
 
-### 🔐 Latest Update: Système de vérification d'identité professionnelle
+### 📍 Latest Update: Géolocalisation Premium (Nouvellement ajouté!)
+- **Fonctionnalité de géolocalisation:**
+  - ✅ Bouton "📍 Près de moi" visible uniquement pour les utilisateurs premium
+  - ✅ Intégration de l'API Geolocation HTML5 du navigateur
+  - ✅ Colonnes latitude/longitude ajoutées dans la table users
+  - ✅ Calcul automatique des distances avec la formule de Haversine
+  - ✅ Tri des professionnels par proximité (plus proche en premier)
+  - ✅ Affichage de la distance en kilomètres sur chaque carte professionnelle
+  - ✅ Coordonnées GPS réelles pour toutes les villes françaises principales
+  - ✅ Accès réservé aux membres Premium uniquement
+  - ✅ Message de redirection vers la page d'abonnement pour les non-premium
+  - ✅ Gestion des erreurs de géolocalisation (permissions refusées, etc.)
+
+### 🔐 Previous Update: Système de vérification d'identité professionnelle
 - **Vérification d'identité:**
   - ✅ Nouvelle table `documents_verification` pour stocker les documents
   - ✅ Colonne `statut_verification` dans la table users (non_verifie/en_attente/verifie)
