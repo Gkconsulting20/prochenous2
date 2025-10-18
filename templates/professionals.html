@@ -6,7 +6,26 @@
 
 <div class="card mb-4">
     <div class="card-body">
-        <h5 class="mb-3">🔍 Rechercher et filtrer</h5>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0">🔍 Rechercher et filtrer</h5>
+            {% if user and user.plan == 'premium' and not nearby_mode %}
+            <button onclick="findNearby()" class="btn btn-warning">
+                📍 Près de moi <span class="badge bg-light text-dark ms-1">Premium</span>
+            </button>
+            {% elif not user or user.plan != 'premium' %}
+            <a href="{{ url_for('subscription') }}" class="btn btn-outline-warning">
+                📍 Près de moi <span class="badge bg-warning text-dark ms-1">Premium</span>
+            </a>
+            {% endif %}
+        </div>
+        
+        {% if nearby_mode %}
+        <div class="alert alert-success mb-3">
+            <strong>📍 Mode géolocalisation activé!</strong> Les professionnels sont triés par distance.
+            <a href="{{ url_for('view_professionals') }}" class="btn btn-sm btn-outline-success ms-2">Revenir à la vue normale</a>
+        </div>
+        {% endif %}
+        
         <form method="GET" action="{{ url_for('view_professionals') }}">
             <div class="row g-3">
                 <div class="col-md-3">
@@ -46,6 +65,31 @@
     </div>
 </div>
 
+<script>
+function findNearby() {
+    if ("geolocation" in navigator) {
+        const btn = event.target;
+        btn.disabled = true;
+        btn.innerHTML = '⏳ Localisation en cours...';
+        
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+                window.location.href = "{{ url_for('professionals_nearby') }}?lat=" + lat + "&lon=" + lon;
+            },
+            function(error) {
+                btn.disabled = false;
+                btn.innerHTML = '📍 Près de moi <span class="badge bg-light text-dark ms-1">Premium</span>';
+                alert("Impossible d'accéder à votre position. Veuillez autoriser la géolocalisation dans votre navigateur.");
+            }
+        );
+    } else {
+        alert("La géolocalisation n'est pas supportée par votre navigateur.");
+    }
+}
+</script>
+
 {% if professionals %}
 <div class="row">
 {% for pro in professionals %}
@@ -71,6 +115,9 @@
                 {% if pro.localisation %}
                 <div class="professional-location">
                     <span class="location-icon">📍</span> {{ pro.localisation }}
+                    {% if nearby_mode and pro.distance is defined and pro.distance != float('inf') %}
+                    <span class="badge bg-success ms-2">{{ "%.1f"|format(pro.distance) }} km</span>
+                    {% endif %}
                 </div>
                 {% endif %}
                 
