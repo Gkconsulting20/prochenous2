@@ -22,7 +22,7 @@ Flask web application with SQLite database
 ├── database.db           # SQLite database (auto-created)
 ├── requirements.txt      # Python dependencies
 ├── templates/            # HTML templates
-│   ├── base.html        # Base template (with modern navbar)
+│   ├── base.html        # Base template (red navbar with premium links)
 │   ├── index.html       # Landing page (with feature boxes)
 │   ├── register.html    # User registration (with location field)
 │   ├── login.html       # User login
@@ -31,17 +31,26 @@ Flask web application with SQLite database
 │   ├── professionals.html     # List of professionals (card layout)
 │   ├── book.html             # Booking interface
 │   ├── add_slot.html         # Add time slots (pros only)
-│   └── rate.html             # Rating form for professionals
+│   ├── rate.html             # Rating form for professionals
+│   ├── subscription.html     # Subscription management (premium)
+│   ├── profil.html          # Enriched professional profiles (premium)
+│   ├── messages.html        # Internal messaging system (premium)
+│   ├── send_message.html    # Message composition (premium)
+│   └── favoris.html         # Favorites list (premium)
 └── static/
-    └── style.css        # Modern responsive styling
+    ├── style.css        # Modern responsive styling (RED theme)
+    └── logo.png         # Custom professional logo (white bg, 50px)
 
 ```
 
 ### Database Schema
-- **users**: id, name, email, password, role (client/pro), localisation, categorie (professional trade)
+- **users**: id, name, email, password, role (client/pro), localisation, categorie (professional trade), plan (gratuit/premium)
 - **slots**: id, pro_id, date (available time slots)
 - **rendezvous**: id, pro_id, client_id, date (booked appointments)
 - **avis**: id, pro_id, client_id, note, commentaire, date (reviews/ratings)
+- **profils_pro**: id, user_id, description, tarif_horaire, experience, certifications, photos_url (premium profiles)
+- **messages**: id, expediteur_id, destinataire_id, contenu, date, lu (internal messaging)
+- **favoris**: id, user_id, pro_id, date_ajout (favorites list)
 
 ### Professional Categories (Métiers Manuels)
 11 trade categories available:
@@ -58,6 +67,8 @@ Flask web application with SQLite database
 11. Autre
 
 ## Features
+
+### Core Features (Free Plan)
 1. User registration (client or professional) with trade category selection
 2. User authentication with bcrypt password hashing
 3. Professional directory browsing with:
@@ -78,7 +89,36 @@ Flask web application with SQLite database
 9. Dashboard views for both user types with:
    - List of upcoming and past appointments
    - Cancellation functionality
-   - Professional statistics
+   - Basic statistics
+
+### Premium Features (9.99€/month)
+10. **💬 Internal Messaging System:**
+    - Private messaging between clients and professionals
+    - Inbox with sent/received messages
+    - Quick reply functionality
+    
+11. **⭐ Favorites System (Clients):**
+    - Unlimited favorites list
+    - Quick access to preferred professionals
+    - One-click add/remove
+    
+12. **📝 Enriched Professional Profiles:**
+    - Detailed descriptions
+    - Hourly rates display
+    - Experience and certifications
+    - Photo galleries
+    - Premium badge visibility
+    
+13. **📊 Advanced Statistics (Professionals):**
+    - Profile views tracking
+    - Booking analytics
+    - Revenue calculations
+    - Performance metrics
+    
+14. **💎 Subscription Management:**
+    - Easy plan comparison
+    - One-click upgrade
+    - Premium badge on all listings
 
 ## Setup and Configuration
 
@@ -95,9 +135,55 @@ Flask web application with SQLite database
 - Currently uses Flask development server (NOT production-ready)
 - **TODO for Production**: Replace with production WSGI server (e.g., Gunicorn, Waitress)
 
-## Recent Changes (October 17, 2025)
+## Recent Changes (October 18, 2025)
 
-### 🏗️ Latest Update: Professional Categories & Branding
+### 💎 Latest Update: Premium Subscription System (Freemium Model)
+- **Business Model:**
+  - ✅ Added freemium subscription system with "gratuit" and "premium" tiers
+  - ✅ New 'plan' column in users table (default: 'gratuit')
+  - ✅ Premium pricing: 9.99€/month displayed on subscription page
+  - ✅ One-click upgrade system with POST /upgrade route
+  
+- **New Database Tables:**
+  - ✅ **profils_pro**: Enriched profiles for premium professionals (description, tarif_horaire, experience, certifications, photos_url)
+  - ✅ **messages**: Internal messaging system (expediteur_id, destinataire_id, contenu, date, lu)
+  - ✅ **favoris**: Favorites list for clients (user_id, pro_id, date_ajout)
+  
+- **Premium Features for Clients:**
+  - ✅ 💬 Internal messaging system to contact professionals privately
+  - ✅ ⭐ Unlimited favorites list to save preferred professionals
+  - ✅ 👁️ Access to enriched professional profiles with detailed info
+  - ✅ New routes: /messages, /send_message/<dest_id>, /favoris, /add_favori/<pro_id>
+  
+- **Premium Features for Professionals:**
+  - ✅ 📝 Enriched profile creation with description, hourly rates, experience, certifications
+  - ✅ 📊 Advanced statistics dashboard (views, bookings, revenue tracking)
+  - ✅ 💬 Receive and respond to client messages
+  - ✅ ⭐ Premium badge displayed on all listings
+  
+- **New Templates Created:**
+  - ✅ subscription.html - Plan comparison and upgrade page
+  - ✅ profil.html - Detailed professional profile page
+  - ✅ messages.html - Messaging inbox (sent/received)
+  - ✅ send_message.html - Message composition form
+  - ✅ favoris.html - Client's favorites list
+  
+- **UI Updates:**
+  - ✅ RED color theme throughout (navbar, buttons, accents) - replacing blue
+  - ✅ Custom logo with white background and shadow for high visibility on red navbar
+  - ✅ Navigation bar updated with premium features (Messages, Favoris, Abonnement)
+  - ✅ "Voir le profil" button added to professional cards
+  - ✅ Premium badges (⭐ Premium) displayed for premium users
+  - ✅ Subscription-aware navigation and feature access control
+  
+- **Test Data:**
+  - ✅ Mixed free/premium users in init_data.py
+  - ✅ Sample enriched profiles for premium professionals
+  - ✅ Test messages between users
+  - ✅ Sample favorites for testing
+  - ✅ Test accounts: client@example.com (premium) / demo123, marc.plombier@prochesnous.fr (premium pro) / demo123
+
+### Previous Update: Professional Categories & Branding (October 17, 2025)
 - **Branding "PRO CHEZ NOUS":**
   - ✅ Updated all templates with new platform name
   - ✅ Changed from generic "Plateforme Pro" to "PRO CHEZ NOUS"
@@ -201,6 +287,11 @@ Flask web application with SQLite database
 5. ✅ Système d'avis et notes
 6. ✅ Dashboards interactifs
 7. ✅ Messages flash informatifs
+8. ✅ **Système d'abonnement freemium (gratuit/premium)**
+9. ✅ **Messagerie interne premium**
+10. ✅ **Liste de favoris premium**
+11. ✅ **Profils enrichis premium**
+12. ✅ **Statistiques avancées premium**
 
 ### 🔐 Sécurité implémentée
 - ✅ Hashage bcrypt des mots de passe
