@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}Profil de {{ pro.name }}{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h3 class="mb-1">{{ pro.name }}</h3>
+                        <span class="badge bg-primary me-2">{{ pro.categorie }}</span>
+                        {% if pro.plan == 'premium' %}
+                        <span class="badge bg-warning">⭐ Premium</span>
+                        {% endif %}
+                    </div>
+                    {% if session.user_id and session.role == 'user' %}
+                    <form method="POST" action="{{ url_for('add_favori', pro_id=pro.id) }}">
+                        <button type="submit" class="btn btn-outline-warning">
+                            {% if is_favori %}❤️ Retirer des favoris{% else %}🤍 Ajouter aux favoris{% endif %}
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+                
+                {% if pro.localisation %}
+                <p class="text-muted"><strong>📍 Localisation :</strong> {{ pro.localisation }}</p>
+                {% endif %}
+                
+                {% if note_moyenne and note_moyenne['moyenne'] %}
+                <p class="text-muted"><strong>⭐ Note moyenne :</strong> {{ "%.1f"|format(note_moyenne['moyenne']) }}/5</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        {% if profil %}
+        <div class="card mb-4 border-warning">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">💎 Profil Premium</h5>
+            </div>
+            <div class="card-body">
+                <p class="lead">{{ profil.description }}</p>
+                
+                <div class="row mt-4">
+                    <div class="col-md-4">
+                        <strong>💰 Tarif horaire :</strong><br>
+                        <span class="text-danger fs-5">{{ profil.tarif_horaire }}</span>
+                    </div>
+                    <div class="col-md-4">
+                        <strong>🏆 Expérience :</strong><br>
+                        {{ profil.experience }}
+                    </div>
+                    <div class="col-md-4">
+                        <strong>📜 Certifications :</strong><br>
+                        {{ profil.certifications }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">📝 Avis clients ({{ avis|length }})</h5>
+            </div>
+            <div class="card-body">
+                {% if avis %}
+                    {% for avis_item in avis %}
+                    <div class="border-bottom pb-3 mb-3">
+                        <div class="d-flex justify-content-between">
+                            <strong>{{ avis_item.client_name }}</strong>
+                            <span class="text-warning">{{ '⭐' * avis_item.note }}</span>
+                        </div>
+                        <p class="text-muted small">{{ avis_item.date }}</p>
+                        {% if avis_item.commentaire %}
+                        <p>{{ avis_item.commentaire }}</p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                {% else %}
+                <p class="text-muted">Aucun avis pour le moment.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card mb-3">
+            <div class="card-body text-center">
+                <h5 class="mb-3">Actions</h5>
+                {% if session.user_id and session.role == 'user' %}
+                <a href="{{ url_for('book', pro_id=pro.id) }}" class="btn btn-danger w-100 mb-2">
+                    📅 Réserver un rendez-vous
+                </a>
+                <a href="{{ url_for('send_message', dest_id=pro.id) }}" class="btn btn-primary w-100 mb-2">
+                    💬 Envoyer un message
+                </a>
+                <a href="{{ url_for('rate', pro_id=pro.id) }}" class="btn btn-outline-warning w-100">
+                    ⭐ Laisser un avis
+                </a>
+                {% else %}
+                <p class="text-muted">Connectez-vous pour réserver</p>
+                <a href="{{ url_for('login') }}" class="btn btn-primary w-100">Se connecter</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

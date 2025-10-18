@@ -78,18 +78,16 @@
                 </div>
                 
                 <div class="professional-actions mt-3">
-                    <a href="{{ url_for('book', pro_id=pro.id) }}" class="btn btn-success w-100">
-                        📅 Réserver
+                    <a href="{{ url_for('profil', pro_id=pro.id) }}" class="btn btn-primary w-100">
+                        👁️ Voir le profil
                     </a>
                 </div>
                 
-                {% if session.role == 'user' %}
                 <div class="mt-2">
-                    <a href="{{ url_for('rate', pro_id=pro.id) }}" class="btn btn-outline-warning w-100">
-                        ⭐ Laisser un avis
+                    <a href="{{ url_for('book', pro_id=pro.id) }}" class="btn btn-danger w-100">
+                        📅 Réserver
                     </a>
                 </div>
-                {% endif %}
             </div>
         </div>
     </div>

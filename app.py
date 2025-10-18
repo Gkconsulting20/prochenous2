@@ -194,6 +194,155 @@ def cancel_rdv(rdv_id):
     
     return redirect(url_for('dashboard'))
 
+@app.route('/subscription')
+def subscription():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    conn = get_db()
+    user = conn.execute('SELECT * FROM users WHERE id = ?', (session['user_id'],)).fetchone()
+    return render_template('subscription.html', user=user)
+
+@app.route('/upgrade_premium', methods=['POST'])
+def upgrade_premium():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    conn = get_db()
+    conn.execute('UPDATE users SET plan = ? WHERE id = ?', ('premium', session['user_id']))
+    conn.commit()
+    flash('Félicitations! Vous êtes maintenant membre Premium 🌟', 'success')
+    return redirect(url_for('dashboard'))
+
+@app.route('/profil/<int:pro_id>')
+def profil(pro_id):
+    conn = get_db()
+    pro = conn.execute('SELECT * FROM users WHERE id = ? AND role = ?', (pro_id, 'pro')).fetchone()
+    if not pro:
+        flash('Professionnel introuvable', 'error')
+        return redirect(url_for('view_professionals'))
+    
+    profil_enrichi = conn.execute('SELECT * FROM profils_pro WHERE pro_id = ?', (pro_id,)).fetchone()
+    avis = conn.execute('''
+        SELECT a.*, u.name as client_name FROM avis a
+        JOIN users u ON a.client_id = u.id
+        WHERE a.pro_id = ? ORDER BY a.date DESC
+    ''', (pro_id,)).fetchall()
+    
+    note_moyenne = conn.execute('SELECT AVG(note) as moyenne FROM avis WHERE pro_id = ?', (pro_id,)).fetchone()
+    
+    is_favori = False
+    if 'user_id' in session:
+        favori = conn.execute('SELECT * FROM favoris WHERE client_id = ? AND pro_id = ?', 
+                            (session['user_id'], pro_id)).fetchone()
+        is_favori = favori is not None
+    
+    return render_template('profil.html', pro=pro, profil=profil_enrichi, avis=avis, 
+                         note_moyenne=note_moyenne, is_favori=is_favori)
+
+@app.route('/messages')
+def messages():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    conn = get_db()
+    user = conn.execute('SELECT * FROM users WHERE id = ?', (session['user_id'],)).fetchone()
+    
+    if user['plan'] != 'premium':
+        flash('La messagerie est réservée aux membres Premium. Passez à Premium pour accéder à cette fonctionnalité!', 'error')
+        return redirect(url_for('subscription'))
+    
+    received = conn.execute('''
+        SELECT m.*, u.name as expediteur_name FROM messages m
+        JOIN users u ON m.expediteur_id = u.id
+        WHERE m.destinataire_id = ? ORDER BY m.date DESC
+    ''', (session['user_id'],)).fetchall()
+    
+    sent = conn.execute('''
+        SELECT m.*, u.name as destinataire_name FROM messages m
+        JOIN users u ON m.destinataire_id = u.id
+        WHERE m.expediteur_id = ? ORDER BY m.date DESC
+    ''', (session['user_id'],)).fetchall()
+    
+    return render_template('messages.html', received=received, sent=sent)
+
+@app.route('/send_message/<int:dest_id>', methods=['GET', 'POST'])
+def send_message(dest_id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    conn = get_db()
+    user = conn.execute('SELECT * FROM users WHERE id = ?', (session['user_id'],)).fetchone()
+    
+    if user['plan'] != 'premium':
+        flash('La messagerie est réservée aux membres Premium!', 'error')
+        return redirect(url_for('subscription'))
+    
+    if request.method == 'POST':
+        from datetime import datetime
+        contenu = request.form.get('contenu', '').strip()
+        if contenu:
+            conn.execute('INSERT INTO messages (expediteur_id, destinataire_id, contenu, date) VALUES (?, ?, ?, ?)',
+                       (session['user_id'], dest_id, contenu, datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
+            conn.commit()
+            flash('Message envoyé avec succès!', 'success')
+            return redirect(url_for('messages'))
+    
+    destinataire = conn.execute('SELECT * FROM users WHERE id = ?', (dest_id,)).fetchone()
+    return render_template('send_message.html', destinataire=destinataire)
+
+@app.route('/favoris')
+def favoris():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    conn = get_db()
+    user = conn.execute('SELECT * FROM users WHERE id = ?', (session['user_id'],)).fetchone()
+    
+    if user['plan'] != 'premium':
+        flash('Les favoris sont réservés aux membres Premium!', 'error')
+        return redirect(url_for('subscription'))
+    
+    favs = conn.execute('''
+        SELECT u.*, f.date_ajout,
+               COALESCE(AVG(a.note), 0) as note_moyenne,
+               COUNT(a.id) as nb_avis
+        FROM favoris f
+        JOIN users u ON f.pro_id = u.id
+        LEFT JOIN avis a ON u.id = a.pro_id
+        WHERE f.client_id = ?
+        GROUP BY u.id
+        ORDER BY f.date_ajout DESC
+    ''', (session['user_id'],)).fetchall()
+    
+    return render_template('favoris.html', favoris=favs)
+
+@app.route('/add_favori/<int:pro_id>', methods=['POST'])
+def add_favori(pro_id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    conn = get_db()
+    user = conn.execute('SELECT * FROM users WHERE id = ?', (session['user_id'],)).fetchone()
+    
+    if user['plan'] != 'premium':
+        flash('Les favoris sont réservés aux membres Premium!', 'error')
+        return redirect(url_for('subscription'))
+    
+    from datetime import datetime
+    existing = conn.execute('SELECT * FROM favoris WHERE client_id = ? AND pro_id = ?', 
+                          (session['user_id'], pro_id)).fetchone()
+    
+    if existing:
+        conn.execute('DELETE FROM favoris WHERE client_id = ? AND pro_id = ?', 
+                   (session['user_id'], pro_id))
+        flash('Retiré des favoris', 'info')
+    else:
+        conn.execute('INSERT INTO favoris (client_id, pro_id, date_ajout) VALUES (?, ?, ?)',
+                   (session['user_id'], pro_id, datetime.now().strftime('%Y-%m-%d')))
+        flash('Ajouté aux favoris! ⭐', 'success')
+    
+    conn.commit()
+    return redirect(request.referrer or url_for('view_professionals'))
+
 @app.route('/logout')
 def logout():
     session.clear()

@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Abonnement{% endblock %}
+{% block content %}
+<div class="text-center mb-5">
+    <h3>💎 Choisissez votre plan</h3>
+    <p class="text-muted">Débloquez toutes les fonctionnalités premium de PRO CHEZ NOUS</p>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card h-100 {% if user['plan'] == 'gratuit' %}border-secondary{% endif %}">
+            <div class="card-body text-center">
+                <h4 class="mb-3">Plan Gratuit</h4>
+                <h2 class="text-muted mb-4">0€<small>/mois</small></h2>
+                
+                <ul class="list-unstyled text-start mb-4">
+                    <li class="mb-2">✅ Recherche de professionnels</li>
+                    <li class="mb-2">✅ Réservation de rendez-vous</li>
+                    <li class="mb-2">✅ Système de notation</li>
+                    <li class="mb-2">❌ Messagerie privée</li>
+                    <li class="mb-2">❌ Liste de favoris</li>
+                    <li class="mb-2">❌ Profils enrichis détaillés</li>
+                </ul>
+                
+                {% if user['plan'] == 'gratuit' %}
+                <button class="btn btn-secondary" disabled>Plan actuel</button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 mb-4">
+        <div class="card h-100 border-warning shadow-lg">
+            <div class="card-body text-center position-relative">
+                <span class="badge bg-warning position-absolute top-0 end-0 m-3">⭐ PREMIUM</span>
+                <h4 class="mb-3">Plan Premium</h4>
+                <h2 class="text-danger mb-4">9.99€<small>/mois</small></h2>
+                
+                <ul class="list-unstyled text-start mb-4">
+                    <li class="mb-2">✅ Toutes les fonctionnalités gratuites</li>
+                    <li class="mb-2">✅ <strong>Messagerie privée</strong> avec les professionnels</li>
+                    <li class="mb-2">✅ <strong>Liste de favoris illimitée</strong></li>
+                    <li class="mb-2">✅ <strong>Profils enrichis</strong> avec tarifs et certifications</li>
+                    <li class="mb-2">✅ <strong>Statistiques avancées</strong> (pour les pros)</li>
+                    <li class="mb-2">✅ <strong>Support prioritaire</strong></li>
+                </ul>
+                
+                {% if user['plan'] == 'premium' %}
+                <button class="btn btn-success" disabled>✓ Plan actuel</button>
+                {% else %}
+                <form method="POST" action="{{ url_for('upgrade_premium') }}">
+                    <button type="submit" class="btn btn-warning btn-lg">Passer à Premium 🚀</button>
+                </form>
+                <p class="text-muted mt-2 small">Test gratuit - pas de paiement requis pour la démo</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="alert alert-info mt-4">
+    <strong>💡 Astuce :</strong> Le plan Premium est idéal pour les clients réguliers et les professionnels qui veulent maximiser leur visibilité!
+</div>
+{% endblock %}

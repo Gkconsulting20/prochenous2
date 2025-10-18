@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Messagerie{% endblock %}
+{% block content %}
+<h3 class="mb-4">💬 Messagerie Premium</h3>
+
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">📥 Messages reçus ({{ received|length }})</h5>
+            </div>
+            <div class="card-body">
+                {% if received %}
+                    {% for msg in received %}
+                    <div class="border-bottom pb-3 mb-3">
+                        <div class="d-flex justify-content-between">
+                            <strong>{{ msg.expediteur_name }}</strong>
+                            <small class="text-muted">{{ msg.date }}</small>
+                        </div>
+                        <p class="mb-1">{{ msg.contenu }}</p>
+                        <a href="{{ url_for('send_message', dest_id=msg.expediteur_id) }}" class="btn btn-sm btn-outline-primary">
+                            Répondre
+                        </a>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                <p class="text-muted">Aucun message reçu.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="mb-0">📤 Messages envoyés ({{ sent|length }})</h5>
+            </div>
+            <div class="card-body">
+                {% if sent %}
+                    {% for msg in sent %}
+                    <div class="border-bottom pb-3 mb-3">
+                        <div class="d-flex justify-content-between">
+                            <strong>À : {{ msg.destinataire_name }}</strong>
+                            <small class="text-muted">{{ msg.date }}</small>
+                        </div>
+                        <p class="mb-0">{{ msg.contenu }}</p>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                <p class="text-muted">Aucun message envoyé.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="alert alert-info">
+    <strong>💡 Conseil :</strong> Utilisez la messagerie pour discuter des détails de votre projet avec les professionnels avant de prendre rendez-vous!
+</div>
+{% endblock %}

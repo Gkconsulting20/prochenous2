@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Envoyer un message{% endblock %}
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <h3 class="mb-4">💬 Envoyer un message à {{ destinataire.name }}</h3>
+        
+        <form method="POST">
+            <div class="mb-3">
+                <label for="contenu" class="form-label">Votre message</label>
+                <textarea class="form-control" id="contenu" name="contenu" rows="5" required 
+                          placeholder="Écrivez votre message ici..."></textarea>
+            </div>
+            
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">📤 Envoyer</button>
+                <a href="{{ url_for('messages') }}" class="btn btn-secondary">Annuler</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
