@@ -137,7 +137,24 @@ Flask web application with SQLite database
 
 ## Recent Changes (October 18, 2025)
 
-### 💎 Latest Update: Premium Subscription System (Freemium Model)
+### 🔐 Latest Update: Système de vérification d'identité professionnelle
+- **Vérification d'identité:**
+  - ✅ Nouvelle table `documents_verification` pour stocker les documents
+  - ✅ Colonne `statut_verification` dans la table users (non_verifie/en_attente/verifie)
+  - ✅ Upload de documents (diplômes, certificats, cartes pro, Kbis, assurances)
+  - ✅ Formats acceptés: PDF, JPG, JPEG, PNG (max 16MB)
+  - ✅ Page `/verification` pour que les pros uploadent leurs documents
+  - ✅ Page `/admin_verification` pour valider les documents
+  - ✅ Badge "✓ Vérifié" affiché sur tous les profils vérifiés
+  - ✅ Meilleure crédibilité et confiance pour les professionnels vérifiés
+
+- **Expansion des métiers:**
+  - ✅ 70+ métiers disponibles (au lieu de 11)
+  - ✅ Focus sur métiers manuels et secteur informel
+  - ✅ Icônes emoji pour chaque métier
+  - ✅ Catégories: Bâtiment, Jardinage, Transport, Beauté, Cuisine, Services à domicile, Auto, Éducation, Événementiel, Sécurité, Sport, Agriculture, etc.
+
+### 💎 Previous Update: Premium Subscription System (Freemium Model)
 - **Business Model:**
   - ✅ Added freemium subscription system with "gratuit" and "premium" tiers
   - ✅ New 'plan' column in users table (default: 'gratuit')
