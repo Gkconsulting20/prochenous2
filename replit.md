@@ -3,6 +3,9 @@
 ## Overview
 PRO CHEZ NOUS is a French professional appointment booking platform designed for manual trades (métiers manuels). It connects clients with skilled tradespeople, enabling them to find, book, and manage appointments based on location, professional category, ratings, and availability. The platform aims to streamline the booking process for both clients and professionals, offering a freemium model with enhanced features for premium subscribers.
 
+**Pricing:** 5000 FCFA/month for Premium plan
+**Payment Methods:** T-Money (Togocel) and Flooz (Moov Africa)
+
 ## User Preferences
 - Language: French (application interface)
 - Database: SQLite (existing choice maintained)
@@ -18,7 +21,7 @@ PRO CHEZ NOUS is a French professional appointment booking platform designed for
 ### Core Design Decisions
 - **UI/UX**: Modern, responsive design with a RED theme, card-based layouts, and custom logos. Features intuitive dashboards for both clients and professionals.
 - **Security**: Robust security measures including bcrypt password hashing, environment variable for secret key, and comprehensive form validation.
-- **Freemium Model**: Implements a "gratuit" and "premium" subscription system, gating advanced features like internal messaging, favorites, enriched profiles, advanced statistics, and geolocation.
+- **Freemium Model**: Implements a "gratuit" and "premium" subscription system (5000 FCFA/month), gating advanced features like internal messaging, favorites, enriched profiles, advanced statistics, and geolocation. Payment via T-Money or Flooz.
 - **Geolocation**: Premium-only feature utilizing HTML5 Geolocation API, Haversine formula for distance calculation, and sorting professionals by proximity.
 - **Professional Verification**: System for professionals to upload verification documents, with statuses and a "✓ Vérifié" badge for verified profiles.
 - **Scalability**: Designed with a clear project structure and plans for production-grade WSGI server (Gunicorn).
