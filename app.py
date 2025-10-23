@@ -3,7 +3,8 @@ from werkzeug.utils import secure_filename
 import sqlite3
 import bcrypt
 import os
-from datetime import datetime
+import secrets
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
@@ -596,6 +597,82 @@ def valider_document(doc_id):
     
     conn.commit()
     return redirect(url_for('admin_verification'))
+
+@app.route('/forgot_password', methods=['GET', 'POST'])
+def forgot_password():
+    if request.method == 'POST':
+        email = request.form.get('email', '').strip()
+        
+        if not email:
+            flash('Veuillez entrer votre adresse email', 'error')
+            return render_template('forgot_password.html')
+        
+        conn = get_db()
+        user = conn.execute('SELECT * FROM users WHERE email = ?', (email,)).fetchone()
+        
+        if not user:
+            flash('Aucun compte trouvé avec cette adresse email', 'error')
+            return render_template('forgot_password.html')
+        
+        token = secrets.token_urlsafe(32)
+        expiration = (datetime.now() + timedelta(hours=1)).strftime('%Y-%m-%d %H:%M:%S')
+        
+        conn.execute('''
+            INSERT INTO password_reset_tokens (user_id, token, expiration, used)
+            VALUES (?, ?, ?, 0)
+        ''', (user['id'], token, expiration))
+        conn.commit()
+        
+        reset_url = url_for('reset_password', token=token, _external=True)
+        
+        return render_template('reset_link_sent.html', reset_url=reset_url, email=email)
+    
+    return render_template('forgot_password.html')
+
+@app.route('/reset_password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    conn = get_db()
+    
+    reset_token = conn.execute('''
+        SELECT * FROM password_reset_tokens 
+        WHERE token = ? AND used = 0
+    ''', (token,)).fetchone()
+    
+    if not reset_token:
+        flash('Lien de réinitialisation invalide ou déjà utilisé', 'error')
+        return redirect(url_for('login'))
+    
+    expiration = datetime.strptime(reset_token['expiration'], '%Y-%m-%d %H:%M:%S')
+    if datetime.now() > expiration:
+        flash('Ce lien de réinitialisation a expiré. Veuillez en demander un nouveau.', 'error')
+        return redirect(url_for('forgot_password'))
+    
+    if request.method == 'POST':
+        password = request.form.get('password', '').strip()
+        confirm_password = request.form.get('confirm_password', '').strip()
+        
+        if not password or len(password) < 6:
+            flash('Le mot de passe doit contenir au moins 6 caractères', 'error')
+            return render_template('reset_password.html', token=token)
+        
+        if password != confirm_password:
+            flash('Les mots de passe ne correspondent pas', 'error')
+            return render_template('reset_password.html', token=token)
+        
+        hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+        
+        conn.execute('UPDATE users SET password = ? WHERE id = ?', 
+                    (hashed_password, reset_token['user_id']))
+        
+        conn.execute('UPDATE password_reset_tokens SET used = 1 WHERE id = ?', 
+                    (reset_token['id'],))
+        
+        conn.commit()
+        
+        flash('Votre mot de passe a été réinitialisé avec succès! Vous pouvez maintenant vous connecter.', 'success')
+        return redirect(url_for('login'))
+    
+    return render_template('reset_password.html', token=token)
 
 def init_db():
     conn = get_db()
