@@ -34,3 +34,11 @@ database.db
 instance/
 .webassets-cache
 .DS_Store
+cookies.txt
+.replit
+*.log
+.cache/
+.local/
+.upm/
+static/documents_verification/*
+!static/documents_verification/.gitkeep
