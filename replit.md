@@ -11,6 +11,7 @@ PRO CHEZ NOUS is a French professional appointment booking platform designed for
 ## User Preferences
 - Language: French (application interface)
 - Database: SQLite (existing choice maintained)
+- Authentication: Email OR phone number (to accommodate African market where phone numbers are more common)
 
 ## System Architecture
 
@@ -29,7 +30,7 @@ PRO CHEZ NOUS is a French professional appointment booking platform designed for
 - **Scalability**: Designed with a clear project structure and plans for production-grade WSGI server (Gunicorn).
 
 ### Feature Specifications
-- **User Management**: Secure registration and authentication for both clients and professionals. Password recovery with secure token-based system (1-hour expiration).
+- **User Management**: Secure registration and authentication for both clients and professionals using **email OR phone number**. Password recovery with secure token-based system (1-hour expiration) supporting both email and phone number.
 - **Professional Discovery**: Browsing, advanced search, and filtering by name, city, category, and minimum rating. Professionals are sorted by rating by default, and by proximity for premium users.
 - **Appointment Management**: Professionals manage time slots, clients book and cancel appointments, with automatic slot restoration.
 - **Rating System**: Clients can rate and review professionals.
@@ -42,7 +43,7 @@ PRO CHEZ NOUS is a French professional appointment booking platform designed for
 - **Password Recovery**: Users can reset forgotten passwords via secure token system (demo version displays link directly, production ready for email integration).
 
 ### Database Schema Highlights
-- `users`: Stores user data, role, location, plan, verification status, and GPS coordinates.
+- `users`: Stores user data including email OR phone number (flexible authentication), role, location, plan, verification status, and GPS coordinates.
 - `slots`, `rendezvous`: Manages available and booked appointments.
 - `avis`: Stores client ratings and reviews.
 - `profils_pro`: Extends professional profiles for premium users.
