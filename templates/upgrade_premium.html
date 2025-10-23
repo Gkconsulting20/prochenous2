@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Passer au Premium{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-body">
+                <h2 class="text-center mb-4">🌟 Passez au Premium</h2>
+                
+                <div class="alert alert-info">
+                    <h5>💎 Débloquez toutes les fonctionnalités !</h5>
+                    <p class="mb-0">Pour seulement <strong>5000 FCFA/mois</strong></p>
+                </div>
+                
+                <h4>✨ Avantages Premium :</h4>
+                <ul class="list-group mb-4">
+                    <li class="list-group-item">📱 <strong>Messagerie interne</strong> - Communiquez directement avec les professionnels</li>
+                    <li class="list-group-item">⭐ <strong>Liste de favoris</strong> - Sauvegardez vos professionnels préférés</li>
+                    <li class="list-group-item">📍 <strong>Géolocalisation</strong> - Trouvez les professionnels les plus proches</li>
+                    <li class="list-group-item">📊 <strong>Profils enrichis</strong> - Descriptions détaillées, tarifs, certifications</li>
+                    <li class="list-group-item">📈 <strong>Statistiques avancées</strong> (pros) - Vues de profil, analytics</li>
+                    <li class="list-group-item">✅ <strong>Badge vérifié</strong> (pros) - Augmentez votre crédibilité</li>
+                </ul>
+                
+                <div class="card bg-light mb-4">
+                    <div class="card-body">
+                        <h5>💳 Modes de paiement acceptés :</h5>
+                        <div class="row text-center">
+                            <div class="col-md-6">
+                                <h3>📱 T-Money</h3>
+                                <p class="text-muted">Togocel</p>
+                            </div>
+                            <div class="col-md-6">
+                                <h3>💸 Flooz</h3>
+                                <p class="text-muted">Moov Africa</p>
+                            </div>
+                        </div>
+                        <p class="text-center text-muted mt-2">
+                            <small>+ MTN Mobile Money, Orange Money, et cartes bancaires</small>
+                        </p>
+                    </div>
+                </div>
+                
+                <form method="POST" action="{{ url_for('upgrade_premium') }}" class="text-center">
+                    <button type="submit" class="btn btn-danger btn-lg">
+                        💳 Payer 5000 FCFA - Passer au Premium
+                    </button>
+                </form>
+                
+                <div class="text-center mt-3">
+                    <a href="{{ url_for('dashboard') }}" class="text-muted">
+                        ← Retour au tableau de bord
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

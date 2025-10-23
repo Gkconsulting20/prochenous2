@@ -60,3 +60,43 @@ The platform supports a wide range of manual trade categories (e.g., Plomberie, 
 - **Jinja2**: Templating engine.
 - **Bcrypt**: For password hashing.
 - **HTML5 Geolocation API**: Used for the premium geolocation feature.
+- **FedaPay API**: Payment processing for T-Money, Flooz, and mobile money (optional).
+- **SendGrid API**: Email delivery service for password reset and notifications (optional).
+- **Twilio API**: SMS service for phone verification (optional).
+- **Requests**: HTTP library for API integrations.
+
+## Recent Integrations (October 2024)
+
+### Phone Number Normalization
+- **Status**: ✅ Active
+- **Features**: Automatic normalization to international format (+XXX)
+- **Coverage**: 10 West African countries (Togo, Bénin, Burkina Faso, etc.)
+- **Files**: `utils.py`
+
+### FedaPay Payment Integration
+- **Status**: 🔧 Configured (requires API keys)
+- **Purpose**: Accept Premium subscription payments (5000 FCFA/month)
+- **Payment Methods**: T-Money, Flooz, MTN, Orange Money, cards
+- **Mode**: Sandbox (test) and Live (production) support
+- **Files**: `fedapay_service.py`, `templates/upgrade_premium.html`, `templates/payment_redirect.html`
+- **Configuration**: Set `FEDAPAY_SECRET_KEY`, `FEDAPAY_PUBLIC_KEY`, `FEDAPAY_ENV` in environment
+
+### SendGrid Email Integration
+- **Status**: 🔧 Configured (requires API key)
+- **Purpose**: Automated password reset emails
+- **Features**: HTML email templates, branded design
+- **Files**: `email_service.py`
+- **Configuration**: Set `SENDGRID_API_KEY`, `FROM_EMAIL`, `FROM_NAME` in environment
+- **Fallback**: If not configured, reset links display on screen (demo mode)
+
+### Twilio SMS Integration
+- **Status**: 🔧 Configured (requires credentials)
+- **Purpose**: Phone number verification via SMS codes
+- **Features**: 6-digit code generation, 10-minute expiration
+- **Files**: `sms_service.py`
+- **Configuration**: Set `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_PHONE_NUMBER`
+- **Database**: Creates `sms_verifications` table for code management
+
+## Configuration Guide
+Detailed setup instructions available in `INTEGRATION_GUIDE.md`
+Example environment variables in `.env.example`

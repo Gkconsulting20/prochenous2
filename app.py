@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_from_directory, jsonify
 from werkzeug.utils import secure_filename
 import sqlite3
 import bcrypt
@@ -6,6 +6,9 @@ import os
 import secrets
 from datetime import datetime, timedelta
 from utils import normalize_phone_number, validate_phone_number, format_phone_display
+from fedapay_service import fedapay_service
+from email_service import email_service
+from sms_service import sms_service
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
@@ -370,15 +373,46 @@ def subscription():
     user = conn.execute('SELECT * FROM users WHERE id = ?', (session['user_id'],)).fetchone()
     return render_template('subscription.html', user=user)
 
-@app.route('/upgrade_premium', methods=['POST'])
+@app.route('/upgrade_premium', methods=['GET', 'POST'])
 def upgrade_premium():
     if 'user_id' not in session:
         return redirect(url_for('login'))
+    
     conn = get_db()
-    conn.execute('UPDATE users SET plan = ? WHERE id = ?', ('premium', session['user_id']))
-    conn.commit()
-    flash('Félicitations! Vous êtes maintenant membre Premium 🌟', 'success')
-    return redirect(url_for('dashboard'))
+    user = conn.execute('SELECT * FROM users WHERE id = ?', (session['user_id'],)).fetchone()
+    
+    if request.method == 'POST':
+        if fedapay_service.is_configured():
+            user_data = {
+                'id': user['id'],
+                'name': user['name'],
+                'email': user['email'],
+                'phone': user['phone']
+            }
+            
+            callback_url = url_for('fedapay_callback', _external=True)
+            
+            result = fedapay_service.create_transaction(
+                user_data, 
+                amount=5000,
+                description="Abonnement Premium PRO CHEZ NOUS - 5000 FCFA/mois",
+                callback_url=callback_url
+            )
+            
+            if result['success']:
+                return render_template('payment_redirect.html', 
+                                     payment_url=result['payment_url'],
+                                     transaction_id=result['transaction_id'])
+            else:
+                flash(f"Erreur lors de la création du paiement: {result['error']}", 'error')
+                return redirect(url_for('subscription'))
+        else:
+            conn.execute('UPDATE users SET plan = ? WHERE id = ?', ('premium', session['user_id']))
+            conn.commit()
+            flash('Félicitations! Vous êtes maintenant membre Premium 🌟 (Mode démo - FedaPay non configuré)', 'success')
+            return redirect(url_for('dashboard'))
+    
+    return render_template('upgrade_premium.html', user=user)
 
 @app.route('/profil/<int:pro_id>')
 def profil(pro_id):
@@ -635,8 +669,15 @@ def forgot_password():
             flash('Veuillez entrer votre email ou numéro de téléphone', 'error')
             return render_template('forgot_password.html')
         
+        normalized_phone = normalize_phone_number(identifier) if '@' not in identifier else None
+        
         conn = get_db()
-        user = conn.execute('SELECT * FROM users WHERE email = ? OR phone = ?', (identifier, identifier)).fetchone()
+        if normalized_phone:
+            user = conn.execute('SELECT * FROM users WHERE email = ? OR phone = ? OR phone = ?', 
+                              (identifier, identifier, normalized_phone)).fetchone()
+        else:
+            user = conn.execute('SELECT * FROM users WHERE email = ? OR phone = ?', 
+                              (identifier, identifier)).fetchone()
         
         if not user:
             flash('Aucun compte trouvé avec cet email ou ce numéro de téléphone', 'error')
@@ -652,6 +693,18 @@ def forgot_password():
         conn.commit()
         
         reset_url = url_for('reset_password', token=token, _external=True)
+        
+        if user['email'] and email_service.is_configured():
+            result = email_service.send_password_reset_email(
+                user['email'], 
+                reset_url, 
+                user['name']
+            )
+            if result['success']:
+                flash('Un email de réinitialisation a été envoyé à votre adresse!', 'success')
+                return redirect(url_for('login'))
+            else:
+                flash(f"Erreur lors de l'envoi de l'email. Voici votre lien: {reset_url}", 'warning')
         
         return render_template('reset_link_sent.html', reset_url=reset_url, identifier=identifier)
     
@@ -701,6 +754,86 @@ def reset_password(token):
         return redirect(url_for('login'))
     
     return render_template('reset_password.html', token=token)
+
+@app.route('/fedapay/callback', methods=['POST', 'GET'])
+def fedapay_callback():
+    """
+    Callback/Webhook FedaPay pour confirmer les paiements
+    """
+    if request.method == 'GET':
+        transaction_id = request.args.get('id')
+        status = request.args.get('status', 'unknown')
+        
+        if not transaction_id:
+            flash('Erreur : ID de transaction manquant', 'error')
+            return redirect(url_for('dashboard'))
+        
+        if fedapay_service.is_configured():
+            result = fedapay_service.get_transaction(transaction_id)
+            
+            if result['success']:
+                transaction = result['transaction']
+                trans_status = transaction.get('status', 'unknown')
+                
+                if trans_status == 'approved':
+                    user_id = session.get('user_id')
+                    if user_id:
+                        conn = get_db()
+                        conn.execute('UPDATE users SET plan = ? WHERE id = ?', ('premium', user_id))
+                        conn.commit()
+                        flash('Paiement confirmé ! Vous êtes maintenant membre Premium 🌟', 'success')
+                    return redirect(url_for('dashboard'))
+                elif trans_status == 'declined':
+                    flash('Paiement refusé. Veuillez réessayer.', 'error')
+                    return redirect(url_for('subscription'))
+                elif trans_status == 'canceled':
+                    flash('Paiement annulé.', 'warning')
+                    return redirect(url_for('subscription'))
+                else:
+                    flash(f'Paiement en attente (statut: {trans_status})', 'info')
+                    return redirect(url_for('dashboard'))
+            else:
+                flash(f'Erreur lors de la vérification du paiement: {result["error"]}', 'error')
+                return redirect(url_for('subscription'))
+        
+        if status == 'approved' and 'user_id' in session:
+            conn = get_db()
+            conn.execute('UPDATE users SET plan = ? WHERE id = ?', ('premium', session['user_id']))
+            conn.commit()
+            flash('Vous êtes maintenant membre Premium 🌟 (Mode démo - sans vérification FedaPay)', 'success')
+        else:
+            flash('Mode démo : FedaPay non configuré', 'warning')
+        
+        return redirect(url_for('dashboard'))
+    
+    if request.method == 'POST':
+        payload = request.get_json()
+        
+        if fedapay_service.is_configured():
+            signature = request.headers.get('X-FedaPay-Signature', '')
+            
+            if not fedapay_service.verify_webhook_signature(request.data, signature):
+                return jsonify({'error': 'Invalid signature'}), 401
+            
+            event = payload.get('entity', {})
+            transaction_id = event.get('id')
+            status = event.get('status')
+            
+            if status == 'approved' and transaction_id:
+                conn = get_db()
+                user = conn.execute('''
+                    SELECT id FROM users WHERE id IN (
+                        SELECT user_id FROM rendezvous WHERE id = ?
+                    )
+                ''', (transaction_id,)).fetchone()
+                
+                if user:
+                    conn.execute('UPDATE users SET plan = ? WHERE id = ?', ('premium', user['id']))
+                    conn.commit()
+            
+            return jsonify({'status': 'success'}), 200
+        
+        return jsonify({'error': 'FedaPay not configured'}), 400
 
 def init_db():
     conn = get_db()
