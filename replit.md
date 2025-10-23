@@ -5,6 +5,8 @@ PRO CHEZ NOUS is a French professional appointment booking platform designed for
 
 **Pricing:** 5000 FCFA/month for Premium plan
 **Payment Methods:** T-Money (Togocel) and Flooz (Moov Africa)
+**Target Market:** West Africa (Togo, Benin, Burkina Faso, etc.)
+**Deployment:** PythonAnywhere (SQLite persistent, plan gratuit disponible)
 
 ## User Preferences
 - Language: French (application interface)
