@@ -100,6 +100,16 @@ def init_default_data():
             FOREIGN KEY(pro_id) REFERENCES users(id)
         )
     ''')
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS password_reset_tokens (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            token TEXT UNIQUE NOT NULL,
+            expiration TEXT NOT NULL,
+            used INTEGER DEFAULT 0,
+            FOREIGN KEY(user_id) REFERENCES users(id)
+        )
+    ''')
     conn.commit()
     
     print("🗑️  Nettoyage de la base de données...")
