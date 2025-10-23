@@ -1,28 +1,122 @@
-{% extends "base.html" %}{% block title %}Inscription{% endblock %}{% block content %}
-<h3>Inscription</h3>
-<form method="post" id="registerForm">
-    <input class="form-control mb-2" type="text" name="name" placeholder="Pseudo" required>
-    <input class="form-control mb-2" type="email" name="email" placeholder="Email" required>
-    <input class="form-control mb-2" type="password" name="password" placeholder="Mot de passe" required>
-    <select class="form-control mb-2" name="role" id="role" required>
-        <option value="">Choisir un rôle</option>
-        <option value="user">Utilisateur</option>
-        <option value="pro">Professionnel</option>
-    </select>
-    <div id="proFields" style="display:none;">
-        <input class="form-control mb-2" type="text" name="localisation" placeholder="Localisation (ex: Paris, Lyon, Marseille)">
-        <select class="form-control mb-2" name="categorie" id="categorie">
-            <option value="">Choisir votre métier</option>
-            {% for cat in categories %}
-            <option value="{{ cat }}">{{ cat }}</option>
-            {% endfor %}
-        </select>
+{% extends "base.html" %}
+{% block title %}Inscription{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <h3 class="text-center mb-4">Inscription</h3>
+        
+        <div class="alert alert-info mb-4">
+            <strong>📱 Nouveau !</strong> Vous pouvez vous inscrire avec votre email OU votre numéro de téléphone.
+        </div>
+        
+        <form method="post" id="registerForm">
+            <div class="mb-3">
+                <label for="name" class="form-label">Nom / Pseudo *</label>
+                <input class="form-control" type="text" name="name" id="name" placeholder="Votre nom" required>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Choisissez votre méthode d'identification *</label>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="id_method" id="use_email" value="email" checked>
+                    <label class="form-check-label" for="use_email">
+                        📧 Email
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="id_method" id="use_phone" value="phone">
+                    <label class="form-check-label" for="use_phone">
+                        📱 Numéro de téléphone
+                    </label>
+                </div>
+            </div>
+            
+            <div class="mb-3" id="email_field">
+                <label for="email" class="form-label">Email *</label>
+                <input class="form-control" type="email" name="email" id="email" placeholder="votre.email@example.com">
+            </div>
+            
+            <div class="mb-3" id="phone_field" style="display: none;">
+                <label for="phone" class="form-label">Numéro de téléphone *</label>
+                <input class="form-control" type="tel" name="phone" id="phone" placeholder="+228 XX XX XX XX (Togo, Bénin, Burkina, etc.)">
+                <div class="form-text">Format: +228XXXXXXXX ou 228XXXXXXXX ou 00228XXXXXXXX</div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="password" class="form-label">Mot de passe *</label>
+                <input class="form-control" type="password" name="password" id="password" placeholder="Minimum 6 caractères" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="role" class="form-label">Vous êtes *</label>
+                <select class="form-control" name="role" id="role" required>
+                    <option value="">Choisir un rôle</option>
+                    <option value="user">👤 Client (je cherche des professionnels)</option>
+                    <option value="pro">🔧 Professionnel (je propose mes services)</option>
+                </select>
+            </div>
+            
+            <div id="proFields" style="display:none;">
+                <div class="mb-3">
+                    <label for="localisation" class="form-label">Localisation *</label>
+                    <input class="form-control" type="text" name="localisation" id="localisation" placeholder="Ex: Lomé, Cotonou, Ouagadougou">
+                </div>
+                <div class="mb-3">
+                    <label for="categorie" class="form-label">Votre métier *</label>
+                    <select class="form-control" name="categorie" id="categorie">
+                        <option value="">Choisir votre métier</option>
+                        {% for cat in categories %}
+                        <option value="{{ cat }}">{{ cat }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            
+            <button class="btn btn-success w-100 mb-3" type="submit">S'inscrire</button>
+            
+            <div class="text-center">
+                <a href="{{ url_for('login') }}" class="text-muted">
+                    Déjà inscrit ? Connectez-vous
+                </a>
+            </div>
+        </form>
     </div>
-    <button class="btn btn-success" type="submit">S'inscrire</button>
-</form>
+</div>
+
 <script>
+// Gérer l'affichage des champs pro
 document.getElementById('role').addEventListener('change', function() {
     document.getElementById('proFields').style.display = this.value === 'pro' ? 'block' : 'none';
 });
+
+// Gérer le basculement entre email et téléphone
+const emailRadio = document.getElementById('use_email');
+const phoneRadio = document.getElementById('use_phone');
+const emailField = document.getElementById('email_field');
+const phoneField = document.getElementById('phone_field');
+const emailInput = document.getElementById('email');
+const phoneInput = document.getElementById('phone');
+
+function toggleIdentificationMethod() {
+    if (emailRadio.checked) {
+        emailField.style.display = 'block';
+        phoneField.style.display = 'none';
+        emailInput.required = true;
+        phoneInput.required = false;
+        phoneInput.value = '';
+    } else {
+        emailField.style.display = 'none';
+        phoneField.style.display = 'block';
+        emailInput.required = false;
+        phoneInput.required = true;
+        emailInput.value = '';
+    }
+}
+
+emailRadio.addEventListener('change', toggleIdentificationMethod);
+phoneRadio.addEventListener('change', toggleIdentificationMethod);
+
+// Initialiser
+toggleIdentificationMethod();
 </script>
 {% endblock %}

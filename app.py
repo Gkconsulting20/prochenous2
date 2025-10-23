@@ -53,24 +53,37 @@ def register():
     if request.method == 'POST':
         name = request.form.get('name', '').strip()
         email = request.form.get('email', '').strip()
+        phone = request.form.get('phone', '').strip()
         password = request.form.get('password', '').strip()
         role = request.form.get('role', '').strip()
         localisation = request.form.get('localisation', '').strip()
         categorie = request.form.get('categorie', '').strip() if role == 'pro' else None
         
-        if not name or not email or not password or not role:
+        if not name or not password or not role:
             flash('Tous les champs obligatoires doivent être remplis', 'error')
             return render_template('register.html', categories=categories)
         
-        conn = get_db()
-        existing_user = conn.execute('SELECT * FROM users WHERE email = ?', (email,)).fetchone()
-        if existing_user:
-            flash('Cette adresse email est déjà utilisée', 'error')
+        if not email and not phone:
+            flash('Veuillez fournir un email OU un numéro de téléphone', 'error')
             return render_template('register.html', categories=categories)
         
+        conn = get_db()
+        
+        if email:
+            existing_user = conn.execute('SELECT * FROM users WHERE email = ?', (email,)).fetchone()
+            if existing_user:
+                flash('Cette adresse email est déjà utilisée', 'error')
+                return render_template('register.html', categories=categories)
+        
+        if phone:
+            existing_user = conn.execute('SELECT * FROM users WHERE phone = ?', (phone,)).fetchone()
+            if existing_user:
+                flash('Ce numéro de téléphone est déjà utilisé', 'error')
+                return render_template('register.html', categories=categories)
+        
         hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
-        conn.execute('INSERT INTO users (name, email, password, role, localisation, categorie) VALUES (?, ?, ?, ?, ?, ?)',
-                     (name, email, hashed_password, role, localisation, categorie))
+        conn.execute('INSERT INTO users (name, email, phone, password, role, localisation, categorie) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                     (name, email if email else None, phone if phone else None, hashed_password, role, localisation, categorie))
         conn.commit()
         flash('Inscription réussie! Vous pouvez maintenant vous connecter', 'success')
         return redirect(url_for('login'))
@@ -79,15 +92,16 @@ def register():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        email = request.form.get('email', '').strip()
+        identifier = request.form.get('identifier', '').strip()
         password = request.form.get('password', '').strip()
         
-        if not email or not password:
+        if not identifier or not password:
             flash('Veuillez remplir tous les champs', 'error')
             return render_template('login.html')
         
         conn = get_db()
-        user = conn.execute('SELECT * FROM users WHERE email = ?', (email,)).fetchone()
+        
+        user = conn.execute('SELECT * FROM users WHERE email = ? OR phone = ?', (identifier, identifier)).fetchone()
         
         if user and bcrypt.checkpw(password.encode('utf-8'), user['password']):
             session['user_id'] = user['id']
@@ -95,7 +109,7 @@ def login():
             flash(f'Bienvenue {user["name"]}!', 'success')
             return redirect(url_for('dashboard'))
         else:
-            flash('Email ou mot de passe incorrect', 'error')
+            flash('Email/Téléphone ou mot de passe incorrect', 'error')
     return render_template('login.html')
 
 @app.route('/dashboard')
