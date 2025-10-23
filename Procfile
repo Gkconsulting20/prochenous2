@@ -1,1 +1,1 @@
-web: gunicorn --bind=0.0.0.0:$PORT --reuse-port app:app
+web: bash start.sh
