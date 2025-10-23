@@ -1,4 +1,4 @@
-flask
-flask
-bcrypt
-gunicorn
+flask==3.0.0
+bcrypt==4.1.2
+gunicorn==23.0.0
+werkzeug==3.0.1

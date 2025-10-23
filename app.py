@@ -517,7 +517,7 @@ def upload_document():
     file = request.files['document']
     type_document = request.form.get('type_document', '').strip()
     
-    if file.filename == '':
+    if not file.filename or file.filename == '':
         flash('Aucun fichier sélectionné', 'error')
         return redirect(url_for('verification'))
     
