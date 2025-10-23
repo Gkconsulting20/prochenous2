@@ -15,7 +15,8 @@ def init_default_data():
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY,
             name TEXT,
-            email TEXT UNIQUE,
+            email TEXT,
+            phone TEXT,
             password TEXT,
             role TEXT,
             localisation TEXT,
@@ -110,6 +111,11 @@ def init_default_data():
             FOREIGN KEY(user_id) REFERENCES users(id)
         )
     ''')
+    
+    print("🔍 Création des index pour optimiser les recherches...")
+    cursor.execute('CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)')
+    cursor.execute('CREATE INDEX IF NOT EXISTS idx_users_phone ON users(phone)')
+    
     conn.commit()
     
     print("🗑️  Nettoyage de la base de données...")
@@ -142,8 +148,8 @@ def init_default_data():
     
     for pro in professionals:
         hashed_pwd = hash_password(pro[2])
-        cursor.execute('INSERT INTO users (name, email, password, role, localisation, categorie, plan) VALUES (?, ?, ?, ?, ?, ?, ?)', 
-                      (pro[0], pro[1], hashed_pwd, pro[3], pro[4], pro[5], pro[6]))
+        cursor.execute('INSERT INTO users (name, email, phone, password, role, localisation, categorie, plan) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', 
+                      (pro[0], pro[1], None, hashed_pwd, pro[3], pro[4], pro[5], pro[6]))
     
     print("👤 Création des clients...")
     # Format: (nom, email, mot_de_passe, role, localisation, catégorie, plan)
@@ -155,8 +161,8 @@ def init_default_data():
     
     for client in clients:
         hashed_pwd = hash_password(client[2])
-        cursor.execute('INSERT INTO users (name, email, password, role, localisation, categorie, plan) VALUES (?, ?, ?, ?, ?, ?, ?)', 
-                      (client[0], client[1], hashed_pwd, client[3], client[4], client[5], client[6]))
+        cursor.execute('INSERT INTO users (name, email, phone, password, role, localisation, categorie, plan) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', 
+                      (client[0], client[1], None, hashed_pwd, client[3], client[4], client[5], client[6]))
     
     conn.commit()
     
