@@ -615,17 +615,17 @@ def valider_document(doc_id):
 @app.route('/forgot_password', methods=['GET', 'POST'])
 def forgot_password():
     if request.method == 'POST':
-        email = request.form.get('email', '').strip()
+        identifier = request.form.get('identifier', '').strip()
         
-        if not email:
-            flash('Veuillez entrer votre adresse email', 'error')
+        if not identifier:
+            flash('Veuillez entrer votre email ou numéro de téléphone', 'error')
             return render_template('forgot_password.html')
         
         conn = get_db()
-        user = conn.execute('SELECT * FROM users WHERE email = ?', (email,)).fetchone()
+        user = conn.execute('SELECT * FROM users WHERE email = ? OR phone = ?', (identifier, identifier)).fetchone()
         
         if not user:
-            flash('Aucun compte trouvé avec cette adresse email', 'error')
+            flash('Aucun compte trouvé avec cet email ou ce numéro de téléphone', 'error')
             return render_template('forgot_password.html')
         
         token = secrets.token_urlsafe(32)
@@ -639,7 +639,7 @@ def forgot_password():
         
         reset_url = url_for('reset_password', token=token, _external=True)
         
-        return render_template('reset_link_sent.html', reset_url=reset_url, email=email)
+        return render_template('reset_link_sent.html', reset_url=reset_url, identifier=identifier)
     
     return render_template('forgot_password.html')
 
