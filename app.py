@@ -5,6 +5,7 @@ import bcrypt
 import os
 import secrets
 from datetime import datetime, timedelta
+from utils import normalize_phone_number, validate_phone_number, format_phone_display
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
@@ -67,6 +68,12 @@ def register():
             flash('Veuillez fournir un email OU un numéro de téléphone', 'error')
             return render_template('register.html', categories=categories)
         
+        if phone:
+            if not validate_phone_number(phone):
+                flash('Numéro de téléphone invalide. Format attendu: +228XXXXXXXX ou 90XXXXXX', 'error')
+                return render_template('register.html', categories=categories)
+            phone = normalize_phone_number(phone)
+        
         conn = get_db()
         
         if email:
@@ -99,9 +106,16 @@ def login():
             flash('Veuillez remplir tous les champs', 'error')
             return render_template('login.html')
         
+        normalized_phone = normalize_phone_number(identifier) if '@' not in identifier else None
+        
         conn = get_db()
         
-        user = conn.execute('SELECT * FROM users WHERE email = ? OR phone = ?', (identifier, identifier)).fetchone()
+        if normalized_phone:
+            user = conn.execute('SELECT * FROM users WHERE email = ? OR phone = ? OR phone = ?', 
+                              (identifier, identifier, normalized_phone)).fetchone()
+        else:
+            user = conn.execute('SELECT * FROM users WHERE email = ? OR phone = ?', 
+                              (identifier, identifier)).fetchone()
         
         if user and bcrypt.checkpw(password.encode('utf-8'), user['password']):
             session['user_id'] = user['id']
