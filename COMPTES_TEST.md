@@ -54,17 +54,21 @@
 3. Mot de passe : `test123`
 4. ✅ Vous devriez être connecté comme client
 
-### Test 2 : Connexion par Téléphone ⭐ NOUVEAU
+### Test 2 : Connexion par Téléphone ⭐ NOUVEAU (Corrigé - Tous formats fonctionnent !)
 1. Allez sur `/login`
-2. **Champ Email/Téléphone** : Tapez `90881111` (format court)
+2. **Champ Email/Téléphone** : Tapez n'importe quel format de téléphone
 3. Mot de passe : `test123`
-4. ✅ Le système normalise automatiquement en `+228 90 88 11 11` et vous connecte
+4. ✅ Le système normalise automatiquement et vous connecte
 
-**Formats acceptés** :
-- `90881111` → normalisé en `+228 90 88 11 11`
-- `90 88 11 11` → normalisé en `+228 90 88 11 11`
-- `22890881111` → normalisé en `+228 90 88 11 11`
-- `+228 90 88 11 11` → déjà au bon format
+**✅ TOUS ces formats fonctionnent maintenant** :
+- `90881111` → normalisé en `+22890881111` ✅
+- `90 88 11 11` → normalisé en `+22890881111` ✅
+- `22890881111` → normalisé en `+22890881111` ✅
+- `0022890881111` → normalisé en `+22890881111` ✅
+- `+22890881111` → déjà au bon format ✅
+- `+228 90 88 11 11` → normalisé en `+22890881111` ✅
+
+**Note** : Les numéros sont stockés SANS espaces dans la base de données pour garantir la compatibilité avec tous les formats d'entrée.
 
 ### Test 3 : Upgrade vers Premium (FedaPay)
 1. Connectez-vous avec `jean.peintre@prochesnous.fr` (pro gratuit)
