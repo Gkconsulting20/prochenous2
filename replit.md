@@ -3,7 +3,7 @@
 ## Overview
 PRO CHEZ NOUS is a French professional appointment booking platform designed for manual trades (métiers manuels). It connects clients with skilled tradespeople, enabling them to find, book, and manage appointments based on location, professional category, ratings, and availability. The platform aims to streamline the booking process for both clients and professionals, offering a freemium model with enhanced features for premium subscribers.
 
-**Pricing:** 2000 FCFA/month for Premium plan
+**Pricing:** 1000 FCFA/month for Premium plan (Prix de lancement)
 **Payment Methods:** T-Money (Togocel) and Flooz (Moov Africa)
 **Target Market:** West Africa (Togo, Benin, Burkina Faso, etc.)
 **Deployment:** PythonAnywhere (SQLite persistent, plan gratuit disponible)
@@ -24,7 +24,7 @@ PRO CHEZ NOUS is a French professional appointment booking platform designed for
 ### Core Design Decisions
 - **UI/UX**: Modern, responsive design with a RED theme, card-based layouts, and custom logos. Features intuitive dashboards for both clients and professionals.
 - **Security**: Robust security measures including bcrypt password hashing, environment variable for secret key, and comprehensive form validation.
-- **Freemium Model**: Implements a "gratuit" and "premium" subscription system (2000 FCFA/month), gating advanced features like internal messaging, favorites, enriched profiles, advanced statistics, and geolocation. Payment via T-Money or Flooz.
+- **Freemium Model**: Implements a "gratuit" and "premium" subscription system (1000 FCFA/month - prix de lancement), gating advanced features like internal messaging, favorites, enriched profiles, advanced statistics, and geolocation. Payment via T-Money or Flooz.
 - **Geolocation**: Premium-only feature utilizing HTML5 Geolocation API, Haversine formula for distance calculation, and sorting professionals by proximity.
 - **Professional Verification**: System for professionals to upload verification documents, with statuses and a "✓ Vérifié" badge for verified profiles.
 - **Scalability**: Designed with a clear project structure and plans for production-grade WSGI server (Gunicorn).
@@ -75,7 +75,7 @@ The platform supports a wide range of manual trade categories (e.g., Plomberie, 
 
 ### FedaPay Payment Integration
 - **Status**: 🔧 Configured (requires API keys)
-- **Purpose**: Accept Premium subscription payments (2000 FCFA/month)
+- **Purpose**: Accept Premium subscription payments (1000 FCFA/month - prix de lancement)
 - **Payment Methods**: T-Money, Flooz, MTN, Orange Money, cards
 - **Mode**: Sandbox (test) and Live (production) support
 - **Files**: `fedapay_service.py`, `templates/upgrade_premium.html`, `templates/payment_redirect.html`
