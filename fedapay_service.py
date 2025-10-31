@@ -30,13 +30,13 @@ class FedaPayService:
             'Content-Type': 'application/json'
         }
     
-    def create_transaction(self, user_data, amount=5000, description="Abonnement Premium PRO CHEZ NOUS", callback_url=None):
+    def create_transaction(self, user_data, amount=2000, description="Abonnement Premium PRO CHEZ NOUS", callback_url=None):
         """
         Crée une transaction FedaPay
         
         Args:
             user_data (dict): Données de l'utilisateur (name, email, phone)
-            amount (int): Montant en centimes (5000 = 50.00 FCFA)
+            amount (int): Montant en FCFA (2000 FCFA)
             description (str): Description de la transaction
         
         Returns:

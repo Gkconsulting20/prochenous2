@@ -394,8 +394,8 @@ def upgrade_premium():
             
             result = fedapay_service.create_transaction(
                 user_data, 
-                amount=5000,
-                description="Abonnement Premium PRO CHEZ NOUS - 5000 FCFA/mois",
+                amount=2000,
+                description="Abonnement Premium PRO CHEZ NOUS - 2000 FCFA/mois",
                 callback_url=callback_url
             )
             
