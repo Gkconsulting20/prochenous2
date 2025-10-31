@@ -875,3 +875,14 @@ def init_db():
 if __name__ == '__main__':
     init_db()
     app.run(host='0.0.0.0', port=5000, debug=True)
+def get_db():
+    conn = sqlite3.connect('database.db')
+    conn.row_factory = sqlite3.Row
+
+    # OPTIMISATIONS PRODUCTION (2025)
+    conn.execute("PRAGMA journal_mode = WAL")      # Lecture/Écriture simultanées
+    conn.execute("PRAGMA synchronous = NORMAL")    # Balance vitesse/sécurité
+    conn.execute("PRAGMA cache_size = -64000")     # Cache 64MB
+    conn.execute("PRAGMA temp_store = MEMORY")     # Stockage RAM
+
+    return conn
